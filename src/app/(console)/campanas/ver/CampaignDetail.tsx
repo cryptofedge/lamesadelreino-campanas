@@ -15,6 +15,8 @@ import { useSearchParams } from "next/navigation";
 import { browserClient } from "@/lib/supabase-browser";
 import { useQuery } from "@/lib/useQuery";
 import { handoff, ADAPTERS } from "@/lib/launch";
+import type { BriefSettings } from "@/lib/launch";
+import { budgetProblem } from "@/lib/platform-specs";
 import {
   CAMPAIGN_STATUS,
   PLACEMENT_STATUS,
@@ -37,6 +39,15 @@ export default function CampaignDetail() {
     (sb) => sb.from("campaigns").select("*").eq("id", id).single(),
     [id],
   );
+  // The account ids and targeting live in Ajustes; the brief is wrong without
+  // them, so they are loaded here rather than defaulted.
+  const { data: settingRows } = useQuery<{ key: string; value: string }[]>((sb) =>
+    sb.from("settings").select("*"),
+  );
+  const settings: BriefSettings = Object.fromEntries(
+    (settingRows ?? []).map((r) => [r.key, r.value]),
+  );
+
   const { data: episode } = useQuery<Episode>(
     (sb) =>
       sb
@@ -68,6 +79,15 @@ export default function CampaignDetail() {
   const placements = campaign.placements ?? [];
   const st = CAMPAIGN_STATUS[campaign.status];
   const committed = placements.reduce((s, p) => s + (p.budget ?? 0), 0);
+  // The platforms enforce a *daily* floor, so a healthy-looking total can still
+  // be refused once it is divided across the run.
+  const days = Math.max(
+    1,
+    Math.round(
+      (new Date(campaign.ends_at).getTime() - new Date(campaign.starts_at).getTime()) /
+        86400000,
+    ),
+  );
   const spent = placements.reduce((s, p) => s + (p.spend ?? 0), 0);
   const reach = placements.reduce((s, p) => s + (p.reach ?? 0), 0);
 
@@ -144,8 +164,9 @@ export default function CampaignDetail() {
           const ps = PLACEMENT_STATUS[p.status];
           const paid = p.kind === "paid";
           const adapter = ADAPTERS[p.platform];
-          const h = episode ? handoff(p, campaign, episode) : null;
+          const h = episode ? handoff(p, campaign, episode, settings) : null;
           const isOpen = open === p.id;
+          const shortfall = paid ? budgetProblem(p.platform, p.budget, days) : null;
 
           return (
             <div key={p.id} className="card p-4">
@@ -207,6 +228,15 @@ export default function CampaignDetail() {
                   )}
                 </p>
               </div>
+
+              {shortfall && (
+                <p
+                  className="text-xs mb-3 px-3 py-2 rounded-lg leading-relaxed"
+                  style={{ color: "var(--red)", background: "rgba(255,84,104,0.08)" }}
+                >
+                  ⚠ {shortfall}
+                </p>
+              )}
 
               {(p.reach !== null || p.clicks !== null) && (
                 <div className="flex gap-4 text-xs mb-3 nums" style={{ color: "var(--muted)" }}>

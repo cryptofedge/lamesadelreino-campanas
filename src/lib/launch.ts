@@ -25,6 +25,7 @@
  */
 import type { Campaign, Episode, Placement, Platform } from "./types";
 import { PLATFORMS, money } from "./types";
+import { ACCOUNT_FIELDS, budgetProblem } from "./platform-specs";
 
 export interface Handoff {
   /** Opens the ad manager as deep as the platform allows without an API. */
@@ -84,19 +85,54 @@ export const ADAPTERS: Record<Platform, Adapter> = {
   },
 };
 
-/** Human-readable audience, so the brief says something a person can act on. */
-function audienceFor(c: Campaign): string {
-  switch (c.goal) {
-    case "attendance":
-      return "Nueva York — Brooklyn, Queens, Bronx. 25-60 años. Español. Radio 25 km.";
-    case "subscribers":
-      return "EE.UU. y República Dominicana. 25-55 años. Español. Interés: fe, iglesia, pódcast cristianos.";
-    case "awareness":
-      return "EE.UU., RD, PR. 21-60 años. Español. Intereses cristianos amplios.";
-    case "views":
-    default:
-      return "EE.UU. y RD. 25-55 años. Español. Público parecido a quien ya ve el canal.";
+/**
+ * The saved settings, as the brief needs them.
+ *
+ * These used to be four hardcoded sentences, which meant every campaign claimed
+ * a location nobody had chosen — the one thing on the whole brief that has to
+ * be right, invented. Now it comes from Ajustes.
+ */
+export interface BriefSettings {
+  countries?: string;
+  cities?: string;
+  radiusMiles?: string;
+  ageMin?: string;
+  ageMax?: string;
+  genders?: string;
+  languages?: string;
+  specialCategory?: string;
+  [k: string]: string | undefined;
+}
+
+function audienceLines(s: BriefSettings, c: Campaign): string[] {
+  const local = c.goal === "attendance";
+  return [
+    `PAÍSES: ${s.countries || "(sin definir — ponlo en Ajustes)"}`,
+    `CIUDADES: ${s.cities || "(sin definir)"}${
+      s.radiusMiles ? ` · radio ${s.radiusMiles} millas` : ""
+    }`,
+    local ? "NOTA: es un evento — deja solo las ciudades cercanas." : "",
+    `EDAD: ${s.ageMin || "25"}-${s.ageMax || "55"}`,
+    `GÉNERO: ${s.genders || "Todos"}`,
+    `IDIOMAS: ${s.languages || "Español"}`,
+    s.specialCategory && s.specialCategory !== "Ninguna"
+      ? `CATEGORÍA ESPECIAL DE META: ${s.specialCategory} — Meta va a limitar el targeting por edad y zona.`
+      : "",
+  ].filter(Boolean);
+}
+
+/** The account ids that platform needs, and which are still blank. */
+function accountLines(s: BriefSettings, platform: Platform): string[] {
+  const group =
+    platform === "youtube" ? "google" : platform === "tiktok" ? "tiktok" : "meta";
+  const spec = ACCOUNT_FIELDS[group];
+  const out: string[] = [`CUENTA (${spec.label}):`];
+  for (const f of spec.fields) {
+    const val = s[f.key];
+    if (val) out.push(`  ${f.label}: ${val}`);
+    else if (f.required) out.push(`  ${f.label}: ⚠ FALTA — sin esto no se puede publicar`);
   }
+  return out;
 }
 
 /**
@@ -121,9 +157,24 @@ export function handoff(
   placement: Placement,
   campaign: Campaign,
   episode: Episode,
+  settings: BriefSettings = {},
 ): Handoff {
   const a = ADAPTERS[placement.platform];
   const p = PLATFORMS[placement.platform];
+
+  // Days the money is spread over — the platforms police a *daily* floor, so a
+  // total that looks generous can still be rejected once it is divided up.
+  const days = Math.max(
+    1,
+    Math.round(
+      (new Date(campaign.ends_at).getTime() - new Date(campaign.starts_at).getTime()) /
+        86400000,
+    ),
+  );
+  const shortfall =
+    placement.kind === "paid"
+      ? budgetProblem(placement.platform, placement.budget, days)
+      : null;
 
   const lines = [
     `CAMPAÑA: ${campaign.name}`,
@@ -135,11 +186,16 @@ export function handoff(
     ``,
     `FECHAS: ${campaign.starts_at} → ${campaign.ends_at}`,
     placement.kind === "paid"
-      ? `PRESUPUESTO: ${money(placement.budget)} en total`
+      ? `PRESUPUESTO: ${money(placement.budget)} en total${
+          days > 0 ? ` · ${days} días · ~$${(Number(placement.budget ?? 0) / days).toFixed(0)}/día` : ""
+        }`
       : `PUBLICAR: ${placement.run_at ?? "sin fecha"}`,
+    placement.kind === "paid" && shortfall ? `⚠ ${shortfall}` : null,
     ``,
-    placement.kind === "paid" ? `PÚBLICO: ${audienceFor(campaign)}` : null,
+    ...(placement.kind === "paid" ? audienceLines(settings, campaign) : []),
     placement.kind === "paid" ? `OBJETIVO: ${objectiveFor(campaign)}` : null,
+    ``,
+    ...(placement.kind === "paid" ? accountLines(settings, placement.platform) : []),
     ``,
     `TEXTO:`,
     placement.copy || "(sin texto)",

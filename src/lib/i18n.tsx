@@ -199,6 +199,35 @@ const EN: Record<string, string> = {
   "Presupuesto normal por semana": "Usual weekly budget",
   "Cuándo sale el programa": "When the show airs",
   "Guardado": "Saved",
+  "El programa": "The show",
+  "Con lo que empieza cada campaña nueva.": "What every new campaign starts with.",
+  "Las campañas se programan alrededor de esta fecha: empiezan dos días antes y terminan cinco días después.":
+    "Campaigns are scheduled around this: they start two days before and end five days after.",
+  "Dónde corren los anuncios": "Where the ads run",
+  "Esto es lo que el bot no puede adivinar. Las tres plataformas lo piden y cambia lo que cuesta llegar.":
+    "This is the part the bot cannot guess. All three platforms ask for it, and it changes what reach costs.",
+  "Países": "Countries",
+  "Ciudades o zonas": "Cities or areas",
+  "Separadas por coma. Sirve para eventos y para llenar un culto.":
+    "Comma separated. This is what fills an event or a service.",
+  "Radio alrededor de cada ciudad (millas)": "Radius around each city (miles)",
+  "Meta no acepta menos de 1 milla.": "Meta will not accept under 1 mile.",
+  "Meta no acepta menos de 1 milla. 25 cubre bien los cinco condados.":
+    "Meta will not accept under 1 mile. 25 covers the five boroughs well.",
+  "A quién le hablamos": "Who we are talking to",
+  "Edad desde": "Age from",
+  "Edad hasta": "Age to",
+  "Idiomas": "Languages",
+  "Género": "Gender",
+  "Categoría especial de Meta": "Meta special ad category",
+  "Casi siempre \"Ninguna\". Solo cambia si el anuncio defiende una postura política o social en vez de invitar al episodio — y entonces Meta quita casi todo el targeting por edad y zona.":
+    "Almost always \"None\". Change it only if the ad argues a political or social position rather than inviting people to the episode — and then Meta strips out most age and location targeting.",
+  "Mínimos de cada plataforma": "Each platform's minimums",
+  "Por debajo de esto la plataforma rechaza la campaña, no la entrega despacio.":
+    "Below these the platform rejects the campaign — it does not just deliver slowly.",
+  "obligatorio": "required",
+  "Todo esto entra en el resumen que se manda a cada plataforma y en lo que sabe el bot.":
+    "All of this goes into the brief sent to each platform, and into what the bot knows.",
 
   // Calendar
   "Nada programado": "Nothing scheduled",

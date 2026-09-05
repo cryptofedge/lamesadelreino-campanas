@@ -127,7 +127,7 @@ export const PLATFORMS: Record<
   instagram: { label: "Instagram", short: "IG", color: "#e1499a", organic: true, paid: true,  adProduct: "Meta Ads" },
   facebook:  { label: "Facebook",  short: "FB", color: "#4a8cff", organic: true, paid: true,  adProduct: "Meta Ads" },
   tiktok:    { label: "TikTok",    short: "TT", color: "#3ad9d1", organic: true, paid: true,  adProduct: "TikTok Ads / Promote" },
-  x:         { label: "X",         short: "X",  color: "#c9c9d4", organic: true, paid: false, adProduct: "—" },
+  x:         { label: "X",         short: "X",  color: "#c9c9d4", organic: true, paid: true,  adProduct: "X Ads" },
 };
 
 /**

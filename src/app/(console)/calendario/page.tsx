@@ -11,7 +11,6 @@ import { useQuery } from "@/lib/useQuery";
 import {
   PLATFORMS,
   PLACEMENT_STATUS,
-  money,
   shortDate,
   daysUntil,
 } from "@/lib/types";
@@ -145,11 +144,6 @@ export default function CalendarPage() {
                         <div className="text-xs font-bold" style={{ color: ps.color }}>
                           {t(ps.label)}
                         </div>
-                        {p.kind === "paid" && (
-                          <div className="text-xs nums" style={{ color: "var(--muted)" }}>
-                            {money(p.budget)}
-                          </div>
-                        )}
                       </div>
 
                       {ev && <AddOne event={ev} />}

@@ -14,7 +14,6 @@ import {
   PLATFORMS,
   PLACEMENT_STATUS,
   GOALS,
-  money,
   count,
   shortDate,
   daysUntil,
@@ -23,6 +22,10 @@ import type { Campaign, Episode, Placement } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
 
 type Row = Campaign & { placements: Placement[]; approved_by_name?: string | null };
+
+/** Results, not spend — this board reports on reach, never on cost. */
+const reachOf = (c: Row) =>
+  (c.placements ?? []).reduce((s, p) => s + (p.reach ?? 0), 0);
 
 export default function CampaignsPage() {
   const { t, lang } = useLang();
@@ -38,9 +41,7 @@ export default function CampaignsPage() {
   // Money already committed this month, so the number that matters is on
   // screen without anyone opening a spreadsheet.
   const live = (campaigns ?? []).filter((c) => c.status === "active");
-  const spent = (campaigns ?? [])
-    .flatMap((c) => c.placements ?? [])
-    .reduce((s, p) => s + (p.spend ?? 0), 0);
+  const posts = (campaigns ?? []).flatMap((c) => c.placements ?? []).length;
   const reach = (campaigns ?? [])
     .flatMap((c) => c.placements ?? [])
     .reduce((s, p) => s + (p.reach ?? 0), 0);
@@ -60,7 +61,7 @@ export default function CampaignsPage() {
 
       <div className="grid grid-cols-3 gap-3 mb-6">
         <Stat label={t("Activas")} value={String(live.length)} />
-        <Stat label={t("Gastado")} value={money(spent)} />
+        <Stat label={t("Publicaciones")} value={String(posts)} />
         <Stat label={t("Alcance")} value={count(reach)} />
       </div>
 
@@ -85,7 +86,6 @@ export default function CampaignsPage() {
           const st = CAMPAIGN_STATUS[c.status];
           const days = daysUntil(ep?.publish_at);
           const placements = c.placements ?? [];
-          const committed = placements.reduce((s, p) => s + (p.budget ?? 0), 0);
 
           return (
             <Link
@@ -135,9 +135,9 @@ export default function CampaignsPage() {
                 </div>
 
                 <div className="text-right shrink-0">
-                  <div className="font-bold nums">{money(committed || c.budget_total)}</div>
+                  <div className="font-bold nums">{count(reachOf(c))}</div>
                   <div className="text-[11px]" style={{ color: "var(--faint)" }}>
-                    {t("presupuesto")}
+                    {t("alcance")}
                   </div>
                 </div>
               </div>
@@ -168,7 +168,6 @@ export default function CampaignsPage() {
                         style={{ background: pf.color }}
                       />
                       {pf.short}
-                      {p.kind === "paid" && p.budget ? ` ${money(p.budget)}` : ""}
                       <span style={{ color: ps.color }}>•</span>
                     </span>
                   );

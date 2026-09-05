@@ -21,6 +21,7 @@ const LINKS: { href: string; label: string; ownerOnly?: boolean }[] = [
   { href: "/generador", label: "Generador" },
   { href: "/episodios", label: "Episodios" },
   { href: "/calendario", label: "Calendario" },
+  { href: "/analiticas", label: "Analíticas" },
   { href: "/conexiones", label: "Conexiones", ownerOnly: true },
   { href: "/ajustes", label: "Ajustes", ownerOnly: true },
 ];

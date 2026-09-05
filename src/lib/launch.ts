@@ -80,7 +80,8 @@ export const ADAPTERS: Record<Platform, Adapter> = {
   },
   x: {
     apiReady: false,
-    blocker: "X no está habilitado para anuncios en esta cuenta.",
+    blocker:
+      "X Ads: hace falta una cuenta de anunciante en ads.x.com y método de pago. La API pide acceso aparte.",
     managerUrl: "https://ads.x.com",
   },
 };
@@ -149,7 +150,13 @@ function audienceLines(s: BriefSettings, c: Campaign): string[] {
 /** The account ids that platform needs, and which are still blank. */
 function accountLines(s: BriefSettings, platform: Platform): string[] {
   const group =
-    platform === "youtube" ? "google" : platform === "tiktok" ? "tiktok" : "meta";
+    platform === "youtube"
+      ? "google"
+      : platform === "tiktok"
+        ? "tiktok"
+        : platform === "x"
+          ? "x"
+          : "meta";
   const spec = ACCOUNT_FIELDS[group];
   const out: string[] = [`CUENTA (${spec.label}):`];
   for (const f of spec.fields) {

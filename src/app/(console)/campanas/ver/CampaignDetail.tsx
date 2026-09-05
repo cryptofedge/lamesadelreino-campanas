@@ -16,13 +16,11 @@ import { browserClient } from "@/lib/supabase-browser";
 import { useQuery } from "@/lib/useQuery";
 import { handoff, ADAPTERS } from "@/lib/launch";
 import type { BriefSettings } from "@/lib/launch";
-import { budgetProblem } from "@/lib/platform-specs";
 import {
   CAMPAIGN_STATUS,
   PLACEMENT_STATUS,
   PLATFORMS,
   GOALS,
-  money,
   count,
   shortDate,
 } from "@/lib/types";
@@ -78,7 +76,6 @@ export default function CampaignDetail() {
 
   const placements = campaign.placements ?? [];
   const st = CAMPAIGN_STATUS[campaign.status];
-  const committed = placements.reduce((s, p) => s + (p.budget ?? 0), 0);
   // The platforms enforce a *daily* floor, so a healthy-looking total can still
   // be refused once it is divided across the run.
   const days = Math.max(
@@ -88,8 +85,8 @@ export default function CampaignDetail() {
         86400000,
     ),
   );
-  const spent = placements.reduce((s, p) => s + (p.spend ?? 0), 0);
   const reach = placements.reduce((s, p) => s + (p.reach ?? 0), 0);
+  const clicks = placements.reduce((s, p) => s + (p.clicks ?? 0), 0);
 
   async function approve() {
     setBusy(true);
@@ -149,9 +146,9 @@ export default function CampaignDetail() {
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <Stat label="Presupuesto" value={money(committed)} />
-        <Stat label="Gastado" value={money(spent)} />
         <Stat label="Alcance" value={count(reach)} />
+        <Stat label="Clics" value={count(clicks)} />
+        <Stat label="Publicaciones" value={String(placements.length)} />
       </div>
 
       <h2 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: "var(--faint)" }}>
@@ -166,7 +163,6 @@ export default function CampaignDetail() {
           const adapter = ADAPTERS[p.platform];
           const h = episode ? handoff(p, campaign, episode, settings) : null;
           const isOpen = open === p.id;
-          const shortfall = paid ? budgetProblem(p.platform, p.budget, days) : null;
 
           return (
             <div key={p.id} className="card p-4">
@@ -189,7 +185,7 @@ export default function CampaignDetail() {
                   {ps.label}
                 </span>
                 <span className="ml-auto text-sm nums" style={{ color: "var(--muted)" }}>
-                  {paid ? money(p.budget) : shortDate(p.run_at)}
+                  {shortDate(p.run_at)}
                 </span>
               </div>
 
@@ -229,20 +225,10 @@ export default function CampaignDetail() {
                 </p>
               </div>
 
-              {shortfall && (
-                <p
-                  className="text-xs mb-3 px-3 py-2 rounded-lg leading-relaxed"
-                  style={{ color: "var(--red)", background: "rgba(255,84,104,0.08)" }}
-                >
-                  ⚠ {shortfall}
-                </p>
-              )}
-
               {(p.reach !== null || p.clicks !== null) && (
                 <div className="flex gap-4 text-xs mb-3 nums" style={{ color: "var(--muted)" }}>
                   <span>Alcance {count(p.reach)}</span>
                   <span>Clics {count(p.clicks)}</span>
-                  {paid && <span>Gastado {money(p.spend)}</span>}
                 </div>
               )}
 

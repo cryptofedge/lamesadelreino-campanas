@@ -153,6 +153,13 @@ const placements = [
     reach: 12600, clicks: 540, spend: null,
   },
   {
+    id: "p-49-x", campaign_id: "c-49", platform: "x", kind: "paid",
+    status: "live", budget: 30, run_at: at(-1),
+    copy: "La mesa que nadie ve — ep. 49. Míralo completo. #LaMesaDelReino",
+    creative_url: null, external_id: "x-2210",
+    reach: 4100, clicks: 190, spend: 12,
+  },
+  {
     id: "p-49-ig", campaign_id: "c-49", platform: "instagram", kind: "organic",
     status: "queued", budget: null, run_at: at(2),
     copy: "Corte del domingo. ¿Te ha pasado?",
@@ -234,6 +241,18 @@ const connections = [
     blocked_reason:
       "Los anuncios de Instagram se compran por Meta: mismo App Review que Facebook.",
     last_checked: at(0, 8),
+  },
+  {
+    id: "cx-x-p", platform: "x", kind: "paid",
+    account_name: "X Ads — La Mesa del Reino", connected: false,
+    blocked_reason:
+      "Falta crear la cuenta de anunciante en ads.x.com y cargar método de pago.",
+    last_checked: at(0, 8),
+  },
+  {
+    id: "cx-x-o", platform: "x", kind: "organic",
+    account_name: "@lamesadelreino", connected: true,
+    blocked_reason: null, last_checked: at(0, 8),
   },
   {
     id: "cx-tt-p", platform: "tiktok", kind: "paid",

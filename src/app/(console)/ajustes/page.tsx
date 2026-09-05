@@ -22,7 +22,6 @@ import {
   ACCOUNT_FIELDS,
   DEFAULT_TARGETING,
   SPECIAL_CATEGORIES,
-  MINIMUMS,
   MIN_RADIUS_MILES,
 } from "@/lib/platform-specs";
 
@@ -232,31 +231,6 @@ export default function SettingsPage() {
         <Hint>
           {t("Casi siempre \"Ninguna\". Solo cambia si el anuncio defiende una postura política o social en vez de invitar al episodio — y entonces Meta quita casi todo el targeting por edad y zona.")}
         </Hint>
-      </Card>
-
-      {/* ---------------- Minimums ---------------- */}
-      <Card title={t("Mínimos de cada plataforma")}>
-        <Hint className="mb-3">
-          {t("Por debajo de esto la plataforma rechaza la campaña, no la entrega despacio.")}
-        </Hint>
-        <div className="space-y-2">
-          {Object.entries(MINIMUMS).map(([k, m]) => (
-            <div
-              key={k}
-              className="flex items-start gap-3 text-sm px-3 py-2 rounded-xl"
-              style={{ background: "var(--ink)", border: "1px solid var(--line)" }}
-            >
-              <span className="font-bold w-20 shrink-0 capitalize">{k}</span>
-              <span className="nums shrink-0" style={{ color: "var(--brass)" }}>
-                ${m!.daily}/día
-                {m!.lifetime ? ` · $${m!.lifetime} total` : ""}
-              </span>
-              <span className="text-xs" style={{ color: "var(--faint)" }}>
-                {m!.note}
-              </span>
-            </div>
-          ))}
-        </div>
       </Card>
 
       {/* ---------------- Accounts ---------------- */}

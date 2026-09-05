@@ -240,6 +240,22 @@ const EN: Record<string, string> = {
   "Todo esto entra en el resumen que se manda a cada plataforma y en lo que sabe el bot.":
     "All of this goes into the brief sent to each platform, and into what the bot knows.",
 
+  // Analytics
+  "Analíticas": "Analytics",
+  "Cómo le fue a cada campaña. Alcance, clics y qué tan bien respondió la gente.":
+    "How each campaign did. Reach, clicks, and how well people responded.",
+  "Todavía no hay resultados": "No results yet",
+  "Los números aparecen cuando las plataformas empiezan a reportar.":
+    "The numbers appear once the platforms start reporting.",
+  "Alcance total": "Total reach",
+  "Respuesta": "Response",
+  "Lo que más responde": "Best response",
+  "Lo que más gente ve": "Widest reach",
+  "Por plataforma": "By platform",
+  "Por campaña": "By campaign",
+  "clics": "clicks",
+  "alcance": "reach",
+
   // Calendar
   "Nada programado": "Nothing scheduled",
   "Crea una campaña y las publicaciones aparecerán aquí.":

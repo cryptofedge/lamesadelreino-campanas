@@ -45,6 +45,10 @@ export const MINIMUMS: Partial<Record<Platform, Minimums>> = {
     daily: 10,
     note: "Google no fija un mínimo duro, pero por debajo de ~$10/día un video apenas se entrega.",
   },
+  x: {
+    daily: 5,
+    note: "X no publica un mínimo fijo; por debajo de esto casi no entrega.",
+  },
 };
 
 export interface FieldSpec {
@@ -59,7 +63,7 @@ export interface FieldSpec {
  * campaign form — the ones people discover they are missing halfway through.
  */
 export const ACCOUNT_FIELDS: Record<
-  "meta" | "google" | "tiktok",
+  "meta" | "google" | "tiktok" | "x",
   { label: string; fields: FieldSpec[] }
 > = {
   meta: {
@@ -116,6 +120,23 @@ export const ACCOUNT_FIELDS: Record<
         key: "google_payment",
         label: "Perfil de pago",
         hint: "Google no deja publicar sin método de pago cargado.",
+        required: true,
+      },
+    ],
+  },
+  x: {
+    label: "X Ads",
+    fields: [
+      {
+        key: "x_account",
+        label: "Cuenta de anunciante",
+        hint: "Se crea en ads.x.com con la cuenta del programa.",
+        required: true,
+      },
+      {
+        key: "x_payment",
+        label: "Método de pago",
+        hint: "X no deja publicar sin tarjeta cargada.",
         required: true,
       },
     ],

@@ -28,6 +28,24 @@ When a token arrives, implement `submit()` on that adapter in
 Nothing else in the app changes — which is why the adapters are a lookup table
 rather than deep links sprinkled through the components.
 
+## Ideas and the post generator
+
+Both are templates, not a model call, and that is deliberate: this is a static
+export, so any API key would ship inside the JavaScript for anyone to read.
+Freeform writing belongs to the bot, which holds Gemini and Claude keys
+server-side — `#elmini` on WhatsApp.
+
+What they do instead is the part that does not need a model. The generator knows
+each platform's conventions and limits (TikTok and X *reject* over-length copy
+rather than trimming it, so hashtags are fitted to the room left). The ideas
+page pairs a theme with a format and hands over the opening questions, which are
+the hard part of a conversation show.
+
+**`src/lib/ideas.ts` never produces scripture** — no verses, no references, no
+doctrinal positions, matching the limit the bot carries in its El Mini skill. A
+subtly wrong citation is worse than none on a Christian show, and that call is
+Richard's.
+
 ## Running it
 
 ```bash

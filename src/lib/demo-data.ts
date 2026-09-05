@@ -258,6 +258,7 @@ export const seed = {
   placements,
   connections,
   profiles,
+  ideas: [] as Record<string, unknown>[],
   settings: [
     { key: "weekly_budget", value: "100" },
     { key: "show_day", value: "domingo" },

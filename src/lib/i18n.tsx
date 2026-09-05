@@ -205,6 +205,13 @@ const EN: Record<string, string> = {
   "Crea una campaña y las publicaciones aparecerán aquí.":
     "Create a campaign and its posts will show up here.",
   "Sin fecha": "No date",
+  "Añadir todo al calendario": "Add everything to my calendar",
+  "Funciona con Google, Apple y Outlook. Es una copia del momento: si cambias algo aquí, vuelve a añadirlo.":
+    "Works with Google, Apple and Outlook. It's a snapshot — if you change something here, add it again.",
+  "Añadir a Google Calendar": "Add to Google Calendar",
+  "Descargar para Apple u Outlook": "Download for Apple or Outlook",
+  "Se abre en Apple Calendar, Google o cualquier otro.":
+    "Opens in Apple Calendar, Google, or any other.",
   "Anuncio": "Ad",
   "Post": "Post",
 };

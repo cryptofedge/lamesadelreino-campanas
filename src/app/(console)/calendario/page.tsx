@@ -17,6 +17,10 @@ import {
 } from "@/lib/types";
 import type { Campaign, Placement } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
+import { AddOne, AddAll } from "@/components/CalendarExport";
+import { placementEvent, episodeEvent } from "@/lib/calendar";
+import type { CalEvent } from "@/lib/calendar";
+import type { Episode } from "@/lib/types";
 
 export default function CalendarPage() {
   const { t, lang } = useLang();
@@ -25,6 +29,9 @@ export default function CalendarPage() {
   );
   const { data: campaigns } = useQuery<Campaign[]>((sb) =>
     sb.from("campaigns").select("*"),
+  );
+  const { data: episodes } = useQuery<Episode[]>((sb) =>
+    sb.from("episodes").select("*"),
   );
 
   const byId = new Map((campaigns ?? []).map((c) => [c.id, c]));
@@ -37,9 +44,30 @@ export default function CalendarPage() {
     groups.get(key)!.push(p);
   }
 
+  // Everything in one file: the episodes themselves plus every post and ad
+  // around them. Exporting only the posts would leave the show missing from
+  // the calendar it is meant to organise.
+  const allEvents: CalEvent[] = [
+    ...(episodes ?? []).map((e) => episodeEvent(e, lang)),
+    ...(placements ?? []).map((p) => placementEvent(p, byId.get(p.campaign_id), lang)),
+  ].filter((e): e is CalEvent => e !== null);
+
   return (
     <div>
-      <h1 className="text-2xl font-black tracking-tight mb-5">{t("Calendario")}</h1>
+      <div className="flex items-center gap-3 mb-2 flex-wrap">
+        <h1 className="text-2xl font-black tracking-tight mr-auto">
+          {t("Calendario")}
+        </h1>
+        <AddAll
+          events={allEvents}
+          label={t("Añadir todo al calendario")}
+          filename="la-mesa-del-reino"
+        />
+      </div>
+
+      <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
+        {t("Funciona con Google, Apple y Outlook. Es una copia del momento: si cambias algo aquí, vuelve a añadirlo.")}
+      </p>
 
       {loading && (
         <p className="text-sm" style={{ color: "var(--faint)" }}>
@@ -93,6 +121,7 @@ export default function CalendarPage() {
                   const pf = PLATFORMS[p.platform];
                   const ps = PLACEMENT_STATUS[p.status];
                   const c = byId.get(p.campaign_id);
+                  const ev = placementEvent(p, c, lang);
                   return (
                     <Link
                       key={p.id}
@@ -122,6 +151,8 @@ export default function CalendarPage() {
                           </div>
                         )}
                       </div>
+
+                      {ev && <AddOne event={ev} />}
                     </Link>
                   );
                 })}

@@ -16,6 +16,8 @@ import { browserClient } from "@/lib/supabase-browser";
 import { useQuery } from "@/lib/useQuery";
 import { money } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
+import MapPicker from "@/components/MapPicker";
+import type { Pin } from "@/components/MapPicker";
 import {
   ACCOUNT_FIELDS,
   DEFAULT_TARGETING,
@@ -64,6 +66,17 @@ export default function SettingsPage() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
     reload();
+  }
+
+  // Pins are stored as JSON in the same key/value settings table. A corrupt
+  // value must not take the whole page down with it.
+  let pins: Pin[] = [];
+  try {
+    const raw = v.map_pins;
+    if (raw) pins = JSON.parse(raw);
+    if (!Array.isArray(pins)) pins = [];
+  } catch {
+    pins = [];
   }
 
   const radius = Number(v.radiusMiles ?? 25);
@@ -147,6 +160,18 @@ export default function SettingsPage() {
         ) : (
           <Hint>{t("Meta no acepta menos de 1 milla. 25 cubre bien los cinco condados.")}</Hint>
         )}
+
+        <Label className="mt-5">{t("En el mapa")}</Label>
+        <MapPicker
+          pins={pins}
+          radiusMiles={radius > 0 ? radius : 25}
+          onChange={(next) => {
+            set("map_pins", JSON.stringify(next));
+            // Keep the written list in step, so the brief reads the same
+            // wherever it is looked at.
+            set("cities", next.map((p) => p.name).join(", "));
+          }}
+        />
       </Card>
 
       {/* ---------------- Audience ---------------- */}

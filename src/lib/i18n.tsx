@@ -226,6 +226,17 @@ const EN: Record<string, string> = {
   "Por debajo de esto la plataforma rechaza la campaña, no la entrega despacio.":
     "Below these the platform rejects the campaign — it does not just deliver slowly.",
   "obligatorio": "required",
+  "En el mapa": "On the map",
+  "Busca una ciudad o dirección": "Search a city or address",
+  "Buscar": "Search",
+  "Toca el mapa para poner un punto, o arrastra uno para moverlo. El círculo es el radio.":
+    "Tap the map to drop a pin, or drag one to move it. The circle is the radius.",
+  "No encontramos ese lugar. Prueba con la ciudad y el estado.":
+    "We couldn't find that place. Try the city and state.",
+  "No se pudo buscar ahora. Toca el mapa para poner el punto a mano.":
+    "Search isn't working right now. Tap the map to place the pin by hand.",
+  "El mapa no cargó. Puedes seguir escribiendo las ciudades a mano arriba.":
+    "The map didn't load. You can still type the cities by hand above.",
   "Todo esto entra en el resumen que se manda a cada plataforma y en lo que sabe el bot.":
     "All of this goes into the brief sent to each platform, and into what the bot knows.",
 

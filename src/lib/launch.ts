@@ -106,11 +106,36 @@ export interface BriefSettings {
 
 function audienceLines(s: BriefSettings, c: Campaign): string[] {
   const local = c.goal === "attendance";
+
+  // Pinned points, with coordinates. Every ad manager takes a lat/lng and a
+  // radius directly, which is exact in a way "Brooklyn NY" never is.
+  let pinLines: string[] = [];
+  try {
+    const pins = JSON.parse(s.map_pins || "[]") as {
+      name: string;
+      lat: number;
+      lng: number;
+      radiusMiles: number;
+    }[];
+    if (Array.isArray(pins) && pins.length) {
+      pinLines = [
+        "PUNTOS EN EL MAPA:",
+        ...pins.map(
+          (p) =>
+            `  ${p.name} — ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)} · radio ${p.radiusMiles} millas`,
+        ),
+      ];
+    }
+  } catch {
+    // A malformed value must not take the brief down with it.
+  }
+
   return [
     `PAÍSES: ${s.countries || "(sin definir — ponlo en Ajustes)"}`,
     `CIUDADES: ${s.cities || "(sin definir)"}${
       s.radiusMiles ? ` · radio ${s.radiusMiles} millas` : ""
     }`,
+    ...pinLines,
     local ? "NOTA: es un evento — deja solo las ciudades cercanas." : "",
     `EDAD: ${s.ageMin || "25"}-${s.ageMax || "55"}`,
     `GÉNERO: ${s.genders || "Todos"}`,

@@ -195,13 +195,107 @@ export interface Idea {
   id: string;
   theme: string;
   themeId: string;
-  format: Format;
+  /** The label as shown. A typed-in format lands here verbatim. */
+  format: string;
   title: string;
   questions: string[];
   guest: string;
+  /** True when this came from a typed topic rather than a curated theme. */
+  custom?: boolean;
 }
 
 const pick = <T,>(list: T[], n: number): T => list[n % list.length];
+
+/* ------------------------------------------------------------------ */
+/* Typed-in topics.
+
+   The curated themes above carry questions written for them specifically,
+   which is why they are good. A topic Richard types has none of that, so
+   these frames do the work instead: they are deliberately about the
+   *person's relationship* to a subject rather than the subject itself,
+   which is what makes them land on almost anything — "matrimonio",
+   "redes sociales", "mudarse de país" — without knowing a thing about it.
+
+   Still no scripture, for the same reason as everywhere else in this file. */
+/* ------------------------------------------------------------------ */
+
+const CUSTOM_TITLES = [
+  "Hablemos de {t}",
+  "Lo que nadie te dice sobre {t}",
+  "Cuando {t} deja de ser fácil",
+  "¿Y si {t} no es lo que pensabas?",
+  "{t}: lo que aprendimos tarde",
+  "La verdad sobre {t}",
+];
+
+const CUSTOM_QUESTIONS = [
+  "¿Qué es lo que más te ha costado de {t}?",
+  "¿Qué te dijeron sobre {t} que después resultó no ser cierto?",
+  "¿En qué momento {t} cambió para ti?",
+  "¿Qué le dirías a alguien que apenas está empezando con {t}?",
+  "¿Qué parte de {t} no se habla en la iglesia?",
+  "¿Cómo sabes cuándo {t} se volvió un problema?",
+  "¿Qué te hubiera gustado que alguien te explicara sobre {t}?",
+  "¿Qué se pierde cuando no hablamos de {t}?",
+  "¿Cuándo fue la última vez que {t} te hizo dudar?",
+];
+
+const CUSTOM_GUESTS = [
+  "Alguien que haya vivido {t} de cerca y pueda contarlo sin adornos.",
+  "Una persona que cambió de opinión sobre {t} con los años.",
+  "Alguien que trabaje con gente que pasa por {t}.",
+  "Dos personas que vean {t} de forma distinta, en la misma mesa.",
+];
+
+/** Lower-cases a typed topic for mid-sentence use, unless it is a proper noun. */
+function inSentence(topic: string): string {
+  const t = topic.trim();
+  if (!t) return t;
+  // A word the person capitalised in the middle of their input is probably a
+  // name or place — leave the whole thing alone rather than mangling it.
+  const hasInnerCaps = /\s[A-ZÁÉÍÓÚÑ]/.test(t);
+  if (hasInnerCaps) return t;
+  return t.charAt(0).toLowerCase() + t.slice(1);
+}
+
+/** Ideas for a topic that is not one of the curated themes. */
+export function customIdeas(
+  topic: string,
+  seed: number,
+  count = 6,
+  formatLabel?: string,
+): Idea[] {
+  const shown = topic.trim();
+  const t = inSentence(shown);
+  const formats = Object.keys(FORMATS) as Format[];
+  const out: Idea[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const n = seed + i;
+    const label = formatLabel?.trim() || FORMATS[pick(formats, n * 3)].label;
+
+    // Three different questions per idea, walking the list rather than
+    // repeating the same opener six times.
+    const questions = [0, 1, 2].map((k) =>
+      CUSTOM_QUESTIONS[(n * 3 + k) % CUSTOM_QUESTIONS.length].replaceAll("{t}", t),
+    );
+
+    out.push({
+      id: `custom-${n}`,
+      theme: shown,
+      themeId: "custom",
+      format: label,
+      title: pick(CUSTOM_TITLES, n)
+        .replaceAll("{t}", t)
+        // A title that starts with the topic should keep its capital.
+        .replace(/^(.)/, (c) => c.toUpperCase()),
+      questions,
+      guest: pick(CUSTOM_GUESTS, n).replaceAll("{t}", t),
+      custom: true,
+    });
+  }
+  return out;
+}
 
 /**
  * A batch of ideas.

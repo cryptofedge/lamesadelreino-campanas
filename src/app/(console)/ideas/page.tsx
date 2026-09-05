@@ -13,15 +13,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { browserClient } from "@/lib/supabase-browser";
 import { useQuery } from "@/lib/useQuery";
-import { generateIdeas, FORMATS, THEME_LIST } from "@/lib/ideas";
+import { generateIdeas, customIdeas, FORMATS, THEME_LIST } from "@/lib/ideas";
 import type { Format, Idea } from "@/lib/ideas";
 import type { Episode } from "@/lib/types";
 
 export default function IdeasPage() {
   const router = useRouter();
   const [seed, setSeed] = useState(0);
-  const [format, setFormat] = useState<Format | "">("");
-  const [theme, setTheme] = useState("");
+  // Free text, not a select. The curated themes are suggestions in a datalist,
+  // so Richard can pick one or type "matrimonio joven" and still get somewhere.
+  const [topic, setTopic] = useState("");
+  const [format, setFormat] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const { data: episodes } = useQuery<Episode[]>((sb) =>
@@ -31,7 +33,24 @@ export default function IdeasPage() {
     { id: string; title: string; theme: string; questions: string; used: boolean }[]
   >((sb) => sb.from("ideas").select("*"));
 
-  const ideas = generateIdeas(seed, 6, format || undefined, theme || undefined);
+  // A typed topic that matches a curated theme uses that theme's hand-written
+  // questions; anything else falls through to the generic frames, which are
+  // written to work on a subject nobody anticipated.
+  const matched = THEME_LIST.find(
+    (t) => t.label.toLowerCase() === topic.trim().toLowerCase(),
+  );
+  const matchedFormat = (Object.keys(FORMATS) as Format[]).find(
+    (f) => FORMATS[f].label.toLowerCase() === format.trim().toLowerCase(),
+  );
+
+  const ideas =
+    topic.trim() && !matched
+      ? customIdeas(topic, seed, 6, format || undefined)
+      : generateIdeas(seed, 6, matchedFormat, matched?.id).map((i) => ({
+          ...i,
+          format: matchedFormat ? FORMATS[matchedFormat].label : i.format,
+        }));
+
   const nextNumber = ((episodes ?? [])[0]?.number ?? 0) + 1;
 
   async function keep(idea: Idea) {
@@ -69,7 +88,7 @@ export default function IdeasPage() {
         publish_at: d.toISOString(),
         youtube_url: null,
         thumbnail_url: null,
-        notes: `${FORMATS[idea.format].label} · ${idea.theme}\n\n${idea.questions
+        notes: `${idea.format} · ${idea.theme}\n\n${idea.questions
           .map((q) => "— " + q)
           .join("\n")}\n\nInvitado sugerido: ${idea.guest}`,
       });
@@ -100,31 +119,53 @@ export default function IdeasPage() {
           Filtrar
         </div>
         <div className="flex gap-3 flex-wrap">
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            style={{ width: "auto", flex: "1 1 180px" }}
-          >
-            <option value="">Cualquier tema</option>
+          {/* Inputs with a datalist, not selects: pick a suggestion or type
+              anything. The list stops it being a blank box. */}
+          <input
+            list="temas"
+            value={topic}
+            placeholder="Tema — escribe el tuyo o escoge"
+            onChange={(e) => setTopic(e.target.value)}
+            style={{ flex: "1 1 200px", width: "auto" }}
+          />
+          <datalist id="temas">
             {THEME_LIST.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.label}
-              </option>
+              <option key={t.id} value={t.label} />
             ))}
-          </select>
-          <select
+          </datalist>
+
+          <input
+            list="formatos"
             value={format}
-            onChange={(e) => setFormat(e.target.value as Format | "")}
-            style={{ width: "auto", flex: "1 1 180px" }}
-          >
-            <option value="">Cualquier formato</option>
+            placeholder="Formato — o el tuyo"
+            onChange={(e) => setFormat(e.target.value)}
+            style={{ flex: "1 1 160px", width: "auto" }}
+          />
+          <datalist id="formatos">
             {(Object.keys(FORMATS) as Format[]).map((f) => (
-              <option key={f} value={f}>
-                {FORMATS[f].label}
-              </option>
+              <option key={f} value={FORMATS[f].label} />
             ))}
-          </select>
+          </datalist>
         </div>
+
+        {topic.trim() && !matched && (
+          <p className="text-xs mt-3" style={{ color: "var(--brass)" }}>
+            Tema tuyo: “{topic.trim()}”. Las preguntas se arman para cualquier
+            tema — ajústalas a tu manera antes de grabar.
+          </p>
+        )}
+        {(topic.trim() || format.trim()) && (
+          <button
+            onClick={() => {
+              setTopic("");
+              setFormat("");
+            }}
+            className="text-xs mt-3 px-3 py-1.5 rounded-full font-semibold"
+            style={{ background: "var(--surface-3)", color: "var(--muted)" }}
+          >
+            Limpiar
+          </button>
+        )}
       </div>
 
       <div className="space-y-3 mb-7">
@@ -135,7 +176,7 @@ export default function IdeasPage() {
                 {idea.theme}
               </span>
               <span className="chip" style={{ color: "var(--muted)" }}>
-                {FORMATS[idea.format].label}
+                {idea.format}
               </span>
             </div>
 

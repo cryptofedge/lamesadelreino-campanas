@@ -16,6 +16,8 @@ import { generateOptions, ANGLES, LIMITS } from "@/lib/generate";
 import type { Angle } from "@/lib/generate";
 import { PLATFORMS, GOALS, shortDate } from "@/lib/types";
 import type { Campaign, Episode, Goal, Platform } from "@/lib/types";
+import MediaStudio from "@/components/MediaStudio";
+import ShareButton from "@/components/ShareButton";
 
 export default function GeneratorPage() {
   const router = useRouter();
@@ -204,6 +206,8 @@ export default function GeneratorPage() {
                   Copiar
                 </button>
 
+                <ShareButton text={value} label="WhatsApp" />
+
                 {(campaigns ?? [])
                   .filter((c) => c.status !== "done")
                   .slice(0, 3)
@@ -225,6 +229,20 @@ export default function GeneratorPage() {
             </div>
           );
         })}
+      </div>
+
+      <h2
+        className="text-sm font-bold uppercase tracking-wider mb-3"
+        style={{ color: "var(--faint)" }}
+      >
+        Imagen y video
+      </h2>
+      <div className="mb-6">
+        <MediaStudio
+          episode={ep}
+          campaigns={campaigns ?? []}
+          platform={platform}
+        />
       </div>
 
       <div className="card p-4">

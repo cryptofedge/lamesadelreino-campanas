@@ -16,8 +16,10 @@ import {
   daysUntil,
 } from "@/lib/types";
 import type { Campaign, Placement } from "@/lib/types";
+import { useLang } from "@/lib/i18n";
 
 export default function CalendarPage() {
+  const { t, lang } = useLang();
   const { data: placements, loading } = useQuery<Placement[]>((sb) =>
     sb.from("placements").select("*").order("run_at", { ascending: true }),
   );
@@ -37,19 +39,19 @@ export default function CalendarPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-black tracking-tight mb-5">Calendario</h1>
+      <h1 className="text-2xl font-black tracking-tight mb-5">{t("Calendario")}</h1>
 
       {loading && (
         <p className="text-sm" style={{ color: "var(--faint)" }}>
-          Cargando…
+          {t("Cargando…")}
         </p>
       )}
 
       {!loading && groups.size === 0 && (
         <div className="card p-8 text-center">
-          <p className="font-bold mb-1">Nada programado</p>
+          <p className="font-bold mb-1">{t("Nada programado")}</p>
           <p className="text-sm" style={{ color: "var(--muted)" }}>
-            Crea una campaña y las publicaciones aparecerán aquí.
+            {t("Crea una campaña y las publicaciones aparecerán aquí.")}
           </p>
         </div>
       )}
@@ -61,7 +63,7 @@ export default function CalendarPage() {
             <div key={day}>
               <div className="flex items-baseline gap-2 mb-2">
                 <h2 className="font-bold">
-                  {day === "sin-fecha" ? "Sin fecha" : shortDate(day)}
+                  {day === "sin-fecha" ? t("Sin fecha") : shortDate(day)}
                 </h2>
                 {days !== null && (
                   <span
@@ -76,12 +78,12 @@ export default function CalendarPage() {
                     }}
                   >
                     {days < 0
-                      ? "ya pasó"
+                      ? t("ya pasó")
                       : days === 0
-                        ? "hoy"
+                        ? t("hoy")
                         : days === 1
-                          ? "mañana"
-                          : `en ${days} días`}
+                          ? t("mañana")
+                          : lang === "en" ? `in ${days} days` : `en ${days} días`}
                   </span>
                 )}
               </div>
@@ -106,13 +108,13 @@ export default function CalendarPage() {
                           {p.copy || pf.label}
                         </div>
                         <div className="text-xs truncate" style={{ color: "var(--faint)" }}>
-                          {pf.label} · {p.kind === "paid" ? "Anuncio" : "Post"}
+                          {pf.label} · {p.kind === "paid" ? t("Anuncio") : t("Post")}
                           {c ? ` · ${c.name}` : ""}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-xs font-bold" style={{ color: ps.color }}>
-                          {ps.label}
+                          {t(ps.label)}
                         </div>
                         {p.kind === "paid" && (
                           <div className="text-xs nums" style={{ color: "var(--muted)" }}>

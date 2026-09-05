@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import LoginForm from "./LoginForm";
+import { LangProvider } from "@/lib/i18n";
 
 /**
  * `useSearchParams` needs a Suspense boundary or the static export fails to
@@ -16,7 +17,9 @@ export default function LoginPage() {
         </div>
       }
     >
-      <LoginForm />
+      <LangProvider>
+        <LoginForm />
+      </LangProvider>
     </Suspense>
   );
 }

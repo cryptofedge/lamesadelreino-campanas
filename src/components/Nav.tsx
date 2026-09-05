@@ -11,6 +11,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "@/lib/session";
 import type { Role } from "@/lib/session";
+import { useLang } from "@/lib/i18n";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -27,6 +28,7 @@ const LINKS: { href: string; label: string; ownerOnly?: boolean }[] = [
 export default function Nav({ role, name }: { role: Role; name: string }) {
   const path = usePathname();
   const { signOut } = useSession();
+  const { lang, setLang, t } = useLang();
 
   const links = LINKS.filter((l) => !l.ownerOnly || role === "owner");
 
@@ -54,16 +56,27 @@ export default function Nav({ role, name }: { role: Role; name: string }) {
               className="text-[11px] leading-tight truncate"
               style={{ color: "var(--faint)" }}
             >
-              {name} · {role === "owner" ? "Dueño" : "Equipo"}
+              {name} · {role === "owner" ? t("Dueño") : t("Equipo")}
             </div>
           </div>
+
+          {/* Shows the language you would switch TO, which is the one thing
+              a two-state toggle must never leave ambiguous. */}
+          <button
+            onClick={() => setLang(lang === "es" ? "en" : "es")}
+            className="text-xs px-2.5 py-1.5 rounded-full border shrink-0 font-bold"
+            style={{ borderColor: "var(--line-warm)", color: "var(--brass)" }}
+            title={lang === "es" ? "Switch to English" : "Cambiar a español"}
+          >
+            {lang === "es" ? "EN" : "ES"}
+          </button>
 
           <button
             onClick={() => void signOut()}
             className="text-xs px-3 py-1.5 rounded-full border shrink-0"
             style={{ borderColor: "var(--line)", color: "var(--muted)" }}
           >
-            Salir
+            {t("Salir")}
           </button>
         </div>
 
@@ -82,7 +95,7 @@ export default function Nav({ role, name }: { role: Role; name: string }) {
                   color: on ? "#17130a" : "var(--muted)",
                 }}
               >
-                {l.label}
+                {t(l.label)}
               </Link>
             );
           })}

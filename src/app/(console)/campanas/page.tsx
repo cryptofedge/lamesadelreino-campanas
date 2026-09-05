@@ -20,10 +20,12 @@ import {
   daysUntil,
 } from "@/lib/types";
 import type { Campaign, Episode, Placement } from "@/lib/types";
+import { useLang } from "@/lib/i18n";
 
 type Row = Campaign & { placements: Placement[]; approved_by_name?: string | null };
 
 export default function CampaignsPage() {
+  const { t, lang } = useLang();
   const { data: campaigns, loading } = useQuery<Row[]>((sb) =>
     sb.from("campaigns").select("*").order("starts_at", { ascending: false }),
   );
@@ -46,33 +48,33 @@ export default function CampaignsPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <h1 className="text-2xl font-black tracking-tight mr-auto">Campañas</h1>
+        <h1 className="text-2xl font-black tracking-tight mr-auto">{t("Campañas")}</h1>
         <Link
           href="/campanas/nueva"
           className="px-4 py-2 rounded-full font-bold text-sm"
           style={{ background: "var(--brass)", color: "#17130a" }}
         >
-          + Nueva campaña
+          {t("+ Nueva campaña")}
         </Link>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <Stat label="Activas" value={String(live.length)} />
-        <Stat label="Gastado" value={money(spent)} />
-        <Stat label="Alcance" value={count(reach)} />
+        <Stat label={t("Activas")} value={String(live.length)} />
+        <Stat label={t("Gastado")} value={money(spent)} />
+        <Stat label={t("Alcance")} value={count(reach)} />
       </div>
 
       {loading && (
         <p className="text-sm" style={{ color: "var(--faint)" }}>
-          Cargando…
+          {t("Cargando…")}
         </p>
       )}
 
       {!loading && (campaigns ?? []).length === 0 && (
         <div className="card p-8 text-center">
-          <p className="font-bold mb-1">Todavía no hay campañas</p>
+          <p className="font-bold mb-1">{t("Todavía no hay campañas")}</p>
           <p className="text-sm" style={{ color: "var(--muted)" }}>
-            Crea la primera para el próximo episodio.
+            {t("Crea la primera para el próximo episodio.")}
           </p>
         </div>
       )}
@@ -101,10 +103,10 @@ export default function CampaignsPage() {
                       className="chip"
                       style={{ color: st.color, borderColor: "var(--line)" }}
                     >
-                      {st.label}
+                      {t(st.label)}
                     </span>
                     <span className="text-xs" style={{ color: "var(--faint)" }}>
-                      {GOALS[c.goal].label}
+                      {t(GOALS[c.goal].label)}
                     </span>
                   </div>
 
@@ -116,18 +118,18 @@ export default function CampaignsPage() {
                   >
                     {ep ? (
                       <>
-                        Sale {shortDate(ep.publish_at)}
+                        {t("Sale")} {shortDate(ep.publish_at)}
                         {days !== null && days >= 0 && (
                           <>
                             {" · "}
                             <span style={{ color: days <= 2 ? "var(--amber)" : "inherit" }}>
-                              {days === 0 ? "hoy" : days === 1 ? "mañana" : `en ${days} días`}
+                              {days === 0 ? t("hoy") : days === 1 ? t("mañana") : lang === "en" ? `in ${days} days` : `en ${days} días`}
                             </span>
                           </>
                         )}
                       </>
                     ) : (
-                      "Sin episodio"
+                      t("Sin episodio")
                     )}
                   </div>
                 </div>
@@ -135,7 +137,7 @@ export default function CampaignsPage() {
                 <div className="text-right shrink-0">
                   <div className="font-bold nums">{money(committed || c.budget_total)}</div>
                   <div className="text-[11px]" style={{ color: "var(--faint)" }}>
-                    presupuesto
+                    {t("presupuesto")}
                   </div>
                 </div>
               </div>
@@ -144,7 +146,7 @@ export default function CampaignsPage() {
               <div className="flex gap-1.5 mt-3 flex-wrap">
                 {placements.length === 0 && (
                   <span className="text-xs" style={{ color: "var(--faint)" }}>
-                    Sin publicaciones todavía
+                    {t("Sin publicaciones todavía")}
                   </span>
                 )}
                 {placements.map((p) => {

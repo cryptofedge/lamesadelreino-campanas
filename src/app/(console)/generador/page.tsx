@@ -20,9 +20,11 @@ import type { Angle } from "@/lib/generate";
 import { PLATFORMS, GOALS, shortDate } from "@/lib/types";
 import type { Campaign, Episode, Goal, Platform } from "@/lib/types";
 import MediaStudio from "@/components/MediaStudio";
+import { useLang } from "@/lib/i18n";
 import ShareButton from "@/components/ShareButton";
 
 export default function GeneratorPage() {
+  const { t, lang } = useLang();
   const router = useRouter();
 
   const { data: episodes } = useQuery<Episode[]>((sb) =>
@@ -56,12 +58,12 @@ export default function GeneratorPage() {
   // Regenerating on every keystroke would wipe an edit in progress, so the
   // post is memoised against the choices that actually define it.
   const post = useMemo(
-    () => (ep ? generatePost(ep, platform, angle, goal, variant) : null),
-    [ep, platform, angle, goal, variant],
+    () => (ep ? generatePost(ep, platform, angle, goal, variant, lang) : null),
+    [ep, platform, angle, goal, variant, lang],
   );
 
   // Any change of inputs drops an edit that no longer belongs to what is shown.
-  const key = `${ep?.id}-${platform}-${angle}-${goal}-${variant}`;
+  const key = `${ep?.id}-${platform}-${angle}-${goal}-${variant}-${lang}`;
   const [lastKey, setLastKey] = useState(key);
   if (key !== lastKey) {
     setLastKey(key);
@@ -91,13 +93,13 @@ export default function GeneratorPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-2xl font-black tracking-tight mb-1">Generador de posts</h1>
+      <h1 className="text-2xl font-black tracking-tight mb-1">{t("Generador de posts")}</h1>
       <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
-        Escoge el episodio y dónde va. Edita lo que quieras antes de guardarlo.
+        {t("Escoge el episodio y dónde va. Edita lo que quieras antes de guardarlo.")}
       </p>
 
       <div className="card p-4 mb-4">
-        <Label>Episodio</Label>
+        <Label>{t("Episodio")}</Label>
         <select
           value={ep?.id ?? ""}
           onChange={(e) => setEpisodeId(e.target.value)}
@@ -110,7 +112,7 @@ export default function GeneratorPage() {
           ))}
         </select>
 
-        <Label>Plataforma</Label>
+        <Label>{t("Plataforma")}</Label>
         <div className="flex gap-1.5 flex-wrap mb-4">
           {(Object.keys(PLATFORMS) as Platform[]).map((p) => {
             const on = platform === p;
@@ -130,7 +132,7 @@ export default function GeneratorPage() {
           })}
         </div>
 
-        <Label>Ángulo</Label>
+        <Label>{t("Ángulo")}</Label>
         <div className="flex gap-1.5 flex-wrap mb-2">
           {(Object.keys(ANGLES) as Angle[]).map((a) => {
             const on = angle === a;
@@ -144,7 +146,7 @@ export default function GeneratorPage() {
                   color: on ? "#17130a" : "var(--muted)",
                 }}
               >
-                {ANGLES[a].label}
+                {t(ANGLES[a].label)}
               </button>
             );
           })}
@@ -153,11 +155,11 @@ export default function GeneratorPage() {
           {ANGLES[angle].hint}
         </p>
 
-        <Label>Qué pedimos</Label>
+        <Label>{t("Qué pedimos")}</Label>
         <select value={goal} onChange={(e) => setGoal(e.target.value as Goal)}>
           {(Object.keys(GOALS) as Goal[]).map((g) => (
             <option key={g} value={g}>
-              {GOALS[g].label}
+              {t(GOALS[g].label)}
             </option>
           ))}
         </select>
@@ -175,7 +177,7 @@ export default function GeneratorPage() {
                 className="text-xs px-3 py-1.5 rounded-full font-semibold"
                 style={{ background: "var(--surface-3)", color: "var(--text)" }}
               >
-                Otra versión
+                {t("Otra versión")}
               </button>
               <span
                 className="ml-auto text-xs nums"
@@ -227,7 +229,7 @@ export default function GeneratorPage() {
                   />
                 )}
                 <span className="text-xs" style={{ color: "var(--muted)" }}>
-                  Va con {creative.name}
+                  {t("Va con")} {creative.name}
                 </span>
               </div>
             )}
@@ -238,7 +240,7 @@ export default function GeneratorPage() {
                 className="text-xs px-3 py-1.5 rounded-full font-semibold"
                 style={{ background: "var(--surface-3)", color: "var(--text)" }}
               >
-                Copiar
+                {t("Copiar")}
               </button>
 
               <ShareButton text={text} label="WhatsApp" />
@@ -257,7 +259,7 @@ export default function GeneratorPage() {
                       color: "#17130a",
                     }}
                   >
-                    {savedTo === c.id ? "Guardado ✓" : `→ ${c.name.split("—")[0].trim()}`}
+                    {savedTo === c.id ? t("Guardado ✓") : `→ ${c.name.split("—")[0].trim()}`}
                   </button>
                 ))}
             </div>

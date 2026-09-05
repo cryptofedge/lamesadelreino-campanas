@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Nav from "@/components/Nav";
 import { SessionProvider, useSession } from "@/lib/session";
+import { LangProvider, useLang } from "@/lib/i18n";
 
 // Money and account access are the owner's alone. Everything to do with
 // *making* the week's content stays open to the team.
@@ -18,6 +19,7 @@ const OWNER_ONLY = ["/conexiones", "/ajustes"];
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useSession();
+  const { t } = useLang();
   const router = useRouter();
   const path = usePathname();
 
@@ -36,7 +38,7 @@ function Guard({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-dvh grid place-items-center">
         <span className="text-sm" style={{ color: "var(--faint)" }}>
-          Cargando…
+          {t("Cargando…")}
         </span>
       </div>
     );
@@ -62,8 +64,10 @@ export default function ConsoleLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SessionProvider>
-      <Guard>{children}</Guard>
-    </SessionProvider>
+    <LangProvider>
+      <SessionProvider>
+        <Guard>{children}</Guard>
+      </SessionProvider>
+    </LangProvider>
   );
 }

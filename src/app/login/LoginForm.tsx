@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { browserClient, IS_DEMO } from "@/lib/supabase-browser";
 import { DEMO_USERS } from "@/lib/demo-data";
+import { useLang } from "@/lib/i18n";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export default function LoginForm() {
+  const { lang, setLang, t } = useLang();
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/campanas";
@@ -29,7 +31,7 @@ export default function LoginForm() {
     if (error) {
       // Deliberately vague: saying which half was wrong tells an attacker which
       // addresses have accounts here.
-      setError("Correo o contraseña incorrectos.");
+      setError(t("Correo o contraseña incorrectos."));
       setBusy(false);
       return;
     }
@@ -48,6 +50,15 @@ export default function LoginForm() {
         className="w-full max-w-md rounded-2xl p-8 sm:p-10 border text-center"
         style={{ background: "var(--surface)", borderColor: "var(--line)" }}
       >
+        <button
+          type="button"
+          onClick={() => setLang(lang === "es" ? "en" : "es")}
+          className="float-right text-xs px-2.5 py-1 rounded-full border font-bold"
+          style={{ borderColor: "var(--line-warm)", color: "var(--brass)" }}
+        >
+          {lang === "es" ? "EN" : "ES"}
+        </button>
+
         <img
           src={`${BASE}/logo.jpg`}
           alt="La Mesa del Reino"
@@ -60,7 +71,7 @@ export default function LoginForm() {
           LA MESA <span style={{ color: "var(--brass)" }}>DEL REINO</span>
         </div>
         <p className="text-sm mb-8" style={{ color: "var(--muted)" }}>
-          Centro de campañas
+          {t("Centro de campañas")}
         </p>
 
         {IS_DEMO && (
@@ -72,7 +83,7 @@ export default function LoginForm() {
               className="text-[11px] font-bold uppercase tracking-wider mb-3"
               style={{ color: "var(--brass)" }}
             >
-              Demostración · toca una cuenta para entrar
+              {t("Demostración · toca una cuenta para entrar")}
             </p>
 
             {DEMO_USERS.map((u) => (
@@ -95,7 +106,7 @@ export default function LoginForm() {
                     className="font-normal"
                     style={{ color: "var(--faint)" }}
                   >
-                    · {u.role === "owner" ? "dueño" : "equipo"}
+                    · {u.role === "owner" ? t("dueño") : t("equipo")}
                   </span>
                 </span>
                 <span
@@ -108,8 +119,7 @@ export default function LoginForm() {
             ))}
 
             <p className="text-xs mt-3" style={{ color: "var(--faint)" }}>
-              Los episodios, campañas y números son de ejemplo. Puedes cambiar
-              lo que quieras: todo vuelve a su sitio al recargar.
+              {t("Los episodios, campañas y números son de ejemplo. Puedes cambiar lo que quieras: todo vuelve a su sitio al recargar.")}
             </p>
           </div>
         )}
@@ -120,7 +130,7 @@ export default function LoginForm() {
             className="text-xs font-semibold uppercase tracking-wider mb-1.5"
             style={{ color: "var(--faint)" }}
           >
-            Correo
+            {t("Correo")}
           </label>
           <input
             id="email"
@@ -137,7 +147,7 @@ export default function LoginForm() {
             className="text-xs font-semibold uppercase tracking-wider mb-1.5"
             style={{ color: "var(--faint)" }}
           >
-            Contraseña
+            {t("Contraseña")}
           </label>
           <input
             id="password"
@@ -161,7 +171,7 @@ export default function LoginForm() {
           className="w-full py-3 rounded-full font-bold text-base disabled:opacity-50"
           style={{ background: "var(--brass)", color: "#17130a" }}
         >
-          {busy ? "Entrando…" : "Entrar"}
+          {busy ? t("Entrando…") : t("Entrar")}
         </button>
       </form>
     </div>

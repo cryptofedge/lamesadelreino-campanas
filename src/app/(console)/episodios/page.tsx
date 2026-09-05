@@ -10,8 +10,10 @@ import { browserClient } from "@/lib/supabase-browser";
 import { useQuery } from "@/lib/useQuery";
 import { shortDate, daysUntil } from "@/lib/types";
 import type { Episode } from "@/lib/types";
+import { useLang } from "@/lib/i18n";
 
 export default function EpisodesPage() {
+  const { t, lang } = useLang();
   const { data: episodes, loading, reload } = useQuery<Episode[]>((sb) =>
     sb.from("episodes").select("*").order("number", { ascending: false }),
   );
@@ -50,13 +52,13 @@ export default function EpisodesPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <h1 className="text-2xl font-black tracking-tight mr-auto">Episodios</h1>
+        <h1 className="text-2xl font-black tracking-tight mr-auto">{t("Episodios")}</h1>
         <button
           onClick={() => setAdding(!adding)}
           className="px-4 py-2 rounded-full font-bold text-sm"
           style={{ background: "var(--brass)", color: "#17130a" }}
         >
-          {adding ? "Cancelar" : "+ Nuevo episodio"}
+          {adding ? t("Cancelar") : t("+ Nuevo episodio")}
         </button>
       </div>
 
@@ -66,19 +68,19 @@ export default function EpisodesPage() {
             Episodio {nextNumber}
           </div>
           <input
-            placeholder="Título"
+            placeholder={t("Título")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="mb-3"
           />
           <input
-            placeholder="Invitado (opcional)"
+            placeholder={t("Invitado (opcional)")}
             value={guest}
             onChange={(e) => setGuest(e.target.value)}
             className="mb-3"
           />
           <label className="text-xs mb-1" style={{ color: "var(--faint)" }}>
-            Fecha de estreno
+            {t("Fecha de estreno")}
           </label>
           <input
             type="date"
@@ -92,14 +94,14 @@ export default function EpisodesPage() {
             className="w-full py-2.5 rounded-full font-bold disabled:opacity-50"
             style={{ background: "var(--brass)", color: "#17130a" }}
           >
-            {busy ? "Guardando…" : "Guardar episodio"}
+            {busy ? t("Guardando…") : t("Guardar episodio")}
           </button>
         </div>
       )}
 
       {loading && (
         <p className="text-sm" style={{ color: "var(--faint)" }}>
-          Cargando…
+          {t("Cargando…")}
         </p>
       )}
 
@@ -124,7 +126,7 @@ export default function EpisodesPage() {
                     {future && (
                       <span style={{ color: "var(--amber)" }}>
                         {" · "}
-                        {days === 0 ? "hoy" : days === 1 ? "mañana" : `en ${days} días`}
+                        {days === 0 ? t("hoy") : days === 1 ? t("mañana") : lang === "en" ? `in ${days} days` : `en ${days} días`}
                       </span>
                     )}
                   </div>
@@ -151,7 +153,7 @@ export default function EpisodesPage() {
                     className="text-xs px-3 py-1.5 rounded-full font-semibold"
                     style={{ background: "var(--surface-3)", color: "var(--text)" }}
                   >
-                    Promocionar
+                    {t("Promocionar")}
                   </Link>
                 </div>
               </div>

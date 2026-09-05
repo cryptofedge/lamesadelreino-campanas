@@ -20,6 +20,7 @@ import { buildPrompt, botMessage, waLink, MEDIA_KINDS } from "@/lib/media";
 import type { MediaKind } from "@/lib/media";
 import ShareButton from "@/components/ShareButton";
 import ImageEditor from "@/components/ImageEditor";
+import { useLang } from "@/lib/i18n";
 import type { Campaign, Episode, Platform } from "@/lib/types";
 
 type Mode = "generar" | "subir";
@@ -39,6 +40,7 @@ export default function MediaStudio({
    *  saved with no creative is a post somebody has to finish somewhere else. */
   onCreative?: (c: { url: string; name: string; video: boolean } | null) => void;
 }) {
+  const { t } = useLang();
   const [mode, setMode] = useState<Mode>("generar");
   const [kind, setKind] = useState<MediaKind>("thumbnail");
   const [idea, setIdea] = useState("");
@@ -151,10 +153,10 @@ export default function MediaStudio({
           className="text-xs font-bold uppercase tracking-wider mr-auto"
           style={{ color: "var(--faint)" }}
         >
-          Imagen y video
+          {t("Imagen y video")}
         </div>
-        {tab("generar", "Generar")}
-        {tab("subir", "Subir la mía")}
+        {tab("generar", t("Generar"))}
+        {tab("subir", t("Subir la mía"))}
       </div>
 
       {mode === "generar" ? (
@@ -174,7 +176,7 @@ export default function MediaStudio({
                   }}
                   title={MEDIA_KINDS[k].hint}
                 >
-                  {MEDIA_KINDS[k].label}
+                  {t(MEDIA_KINDS[k].label)}
                 </button>
               );
             })}
@@ -197,7 +199,7 @@ export default function MediaStudio({
               className="text-xs cursor-pointer"
               style={{ color: "var(--muted)" }}
             >
-              Ver el prompt completo
+              {t("Ver el prompt completo")}
             </summary>
             <pre
               className="text-[11px] whitespace-pre-wrap mt-2 p-3 rounded-xl leading-relaxed"
@@ -221,7 +223,7 @@ export default function MediaStudio({
               className="text-xs px-3 py-1.5 rounded-full font-semibold"
               style={{ background: "var(--surface-3)", color: "var(--text)" }}
             >
-              {copied ? "Copiado ✓" : "Copiar prompt"}
+              {copied ? t("Copiado ✓") : t("Copiar prompt")}
             </button>
 
             <a
@@ -231,7 +233,7 @@ export default function MediaStudio({
               className="text-xs px-3 py-1.5 rounded-full font-semibold"
               style={{ background: "#25D366", color: "#06301a" }}
             >
-              Mandar al bot
+              {t("Mandar al bot")}
             </a>
           </div>
 
@@ -292,7 +294,7 @@ export default function MediaStudio({
                     className="text-xs px-3 py-1.5 rounded-full font-semibold"
                     style={{ background: "var(--surface-3)", color: "var(--text)" }}
                   >
-                    Recortar
+                    {t("Recortar")}
                   </button>
                 )}
 
@@ -301,7 +303,7 @@ export default function MediaStudio({
                   className="text-xs px-3 py-1.5 rounded-full font-semibold"
                   style={{ background: "transparent", color: "var(--red)", border: "1px solid var(--line)" }}
                 >
-                  Quitar
+                  {t("Quitar")}
                 </button>
               </div>
 
@@ -334,9 +336,9 @@ export default function MediaStudio({
                   }}
                 >
                   {attached === c.id
-                    ? "Adjuntado ✓"
+                    ? t("Adjuntado ✓")
                     : uploading
-                      ? "Subiendo…"
+                      ? t("Subiendo…")
                       : `→ ${c.name.split("—")[0].trim()}`}
                 </button>
               ))}

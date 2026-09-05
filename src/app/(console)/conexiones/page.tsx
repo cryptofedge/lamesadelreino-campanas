@@ -16,8 +16,10 @@ import { useQuery } from "@/lib/useQuery";
 import { PLATFORMS, expectedConnections } from "@/lib/types";
 import { ADAPTERS } from "@/lib/launch";
 import type { Connection, Platform, PlacementKind } from "@/lib/types";
+import { useLang } from "@/lib/i18n";
 
 export default function ConnectionsPage() {
+  const { t, lang } = useLang();
   const { data: rows, loading } = useQuery<Connection[]>((sb) =>
     sb.from("connections").select("*"),
   );
@@ -32,26 +34,26 @@ export default function ConnectionsPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-black tracking-tight mb-1">Conexiones</h1>
+      <h1 className="text-2xl font-black tracking-tight mb-1">{t("Conexiones")}</h1>
       <p className="text-sm mb-6" style={{ color: "var(--muted)" }}>
-        Las cuentas que este panel puede usar.
+        {t("Las cuentas que este panel puede usar.")}
       </p>
 
       {loading && (
         <p className="text-sm" style={{ color: "var(--faint)" }}>
-          Cargando…
+          {t("Cargando…")}
         </p>
       )}
 
       <Section
-        title="Publicaciones"
-        hint="Posts, reels y cortes. Se programan desde aquí."
+        title={t("Publicaciones")}
+        hint={t("Posts, reels y cortes. Se programan desde aquí.")}
         items={merged.filter((m) => m.kind === "organic")}
       />
 
       <Section
-        title="Anuncios pagados"
-        hint="Para gastar dinero desde aquí hace falta permiso de cada plataforma. Se pide una vez y tarda días."
+        title={t("Anuncios pagados")}
+        hint={t("Para gastar dinero desde aquí hace falta permiso de cada plataforma. Se pide una vez y tarda días.")}
         items={merged.filter((m) => m.kind === "paid")}
       />
     </div>
@@ -67,6 +69,7 @@ function Section({
   hint: string;
   items: { platform: Platform; kind: PlacementKind; row: Connection | null }[];
 }) {
+  const { t } = useLang();
   if (items.length === 0) return null;
 
   return (
@@ -92,7 +95,7 @@ function Section({
             row?.blocked_reason ??
             (kind === "paid"
               ? ADAPTERS[platform].blocker
-              : "Todavía no se ha conectado esta cuenta.");
+              : t("Todavía no se ha conectado esta cuenta."));
 
           return (
             <div key={`${platform}-${kind}`} className="card p-4">
@@ -116,7 +119,7 @@ function Section({
                     borderColor: "var(--line)",
                   }}
                 >
-                  {connected ? "Conectada" : row ? "Falta permiso" : "Sin conectar"}
+                  {connected ? t("Conectada") : row ? t("Falta permiso") : t("Sin conectar")}
                 </span>
               </div>
 

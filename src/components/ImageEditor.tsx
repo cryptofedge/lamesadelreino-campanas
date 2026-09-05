@@ -14,6 +14,7 @@
  * are the only places the two meet, and they are shared.
  */
 import { useEffect, useRef, useState } from "react";
+import { useLang } from "@/lib/i18n";
 
 /** Longest edge of the exported image. Big enough for a thumbnail, small
  *  enough not to hand a phone a 12MB blob. */
@@ -42,6 +43,7 @@ export default function ImageEditor({
   onDone: (file: File, url: string) => void;
   onCancel: () => void;
 }) {
+  const { t } = useLang();
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [crop, setCrop] = useState<Crop>(CROPS[0]);
   const [zoom, setZoom] = useState(1);
@@ -160,7 +162,7 @@ export default function ImageEditor({
           className="text-xs px-3 py-1.5 rounded-full font-semibold"
           style={{ background: "var(--surface-3)", color: "var(--text)" }}
         >
-          Girar ↻
+          {t("Girar ↻")}
         </button>
       </div>
 
@@ -203,7 +205,7 @@ export default function ImageEditor({
 
       <div className="flex items-center gap-3 mt-3">
         <span className="text-xs" style={{ color: "var(--faint)" }}>
-          Zoom
+          {t("Zoom")}
         </span>
         <input
           type="range"
@@ -217,7 +219,7 @@ export default function ImageEditor({
       </div>
 
       <p className="text-xs mt-2 mb-3" style={{ color: "var(--faint)" }}>
-        Arrastra la foto para moverla dentro del marco.
+        {t("Arrastra la foto para moverla dentro del marco.")}
       </p>
 
       <div className="flex gap-2 flex-wrap">
@@ -227,14 +229,14 @@ export default function ImageEditor({
           className="text-xs px-3 py-1.5 rounded-full font-semibold disabled:opacity-50"
           style={{ background: "var(--brass)", color: "#17130a" }}
         >
-          {busy ? "Recortando…" : "Aplicar recorte"}
+          {busy ? t("Recortando…") : t("Aplicar recorte")}
         </button>
         <button
           onClick={onCancel}
           className="text-xs px-3 py-1.5 rounded-full font-semibold"
           style={{ background: "var(--surface-3)", color: "var(--muted)" }}
         >
-          Cancelar
+          {t("Cancelar")}
         </button>
       </div>
     </div>

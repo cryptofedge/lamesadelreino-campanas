@@ -42,6 +42,16 @@ const HASHTAGS: Record<Platform, string[]> = {
   x: ["#LaMesaDelReino"],
 };
 
+/** The show's name stays Spanish in English posts — it is the brand, not a
+ *  word to translate. Only the tags around it change. */
+const HASHTAGS_EN: Record<Platform, string[]> = {
+  youtube: [],
+  instagram: ["#LaMesaDelReino", "#faith", "#christianpodcast", "#God"],
+  facebook: [],
+  tiktok: ["#LaMesaDelReino", "#faith", "#podcast", "#christian", "#fyp"],
+  x: ["#LaMesaDelReino"],
+};
+
 /**
  * Openers per angle. Several of each so a week of posts does not read like a
  * mail merge — the caller rotates through them with `variant`.
@@ -87,6 +97,50 @@ const CTA: Record<Goal, string[]> = {
   awareness:   ["Compártelo con alguien.", "Etiqueta a quien lo necesite.", "Pásalo."],
 };
 
+/* English is written, not translated. Running the Spanish through a dictionary
+   produces copy that is grammatically fine and sounds like nobody — and the
+   audience for the English posts is bilingual Brooklyn, who would hear it. */
+
+const OPENERS_EN: Record<Angle, string[]> = {
+  pregunta: [
+    "Has this happened to you?",
+    "What if it isn't what you think it is?",
+    "An uncomfortable question:",
+    "How many times have you wondered?",
+  ],
+  cita: [
+    "This was said:",
+    "This line stayed with us:",
+    "We said it and then went quiet:",
+    "Keep this one:",
+  ],
+  invitacion: [
+    "It's out now.",
+    "New episode.",
+    "Pull up a chair.",
+    "Press play when you can.",
+  ],
+  adelanto: [
+    "This Sunday.",
+    "What's coming:",
+    "Get ready for this one.",
+    "Almost here.",
+  ],
+  cierre: [
+    "In case you missed it.",
+    "There's still time.",
+    "This week's is still up.",
+    "If you haven't seen it yet:",
+  ],
+};
+
+const CTA_EN: Record<Goal, string[]> = {
+  views:       ["Watch the full episode.", "Press play.", "Full episode on YouTube."],
+  subscribers: ["Subscribe so you don't miss one.", "Hit the bell.", "Subscribe to the channel."],
+  attendance:  ["We'll be waiting for you.", "See you there.", "Save the date."],
+  awareness:   ["Share it with someone.", "Tag whoever needs this.", "Pass it on."],
+};
+
 const pick = <T,>(list: T[], variant: number): T => list[variant % list.length];
 
 export interface GeneratedPost {
@@ -113,12 +167,19 @@ export function generatePost(
   angle: Angle,
   goal: Goal,
   variant = 0,
+  lang: "es" | "en" = "es",
 ): GeneratedPost {
-  const opener = pick(OPENERS[angle], variant);
-  const cta = pick(CTA[goal], variant);
-  const guest = episode.guest ? ` con ${episode.guest}` : "";
+  const en = lang === "en";
+  const opener = pick(en ? OPENERS_EN[angle] : OPENERS[angle], variant);
+  const cta = pick(en ? CTA_EN[goal] : CTA[goal], variant);
+  const guest = episode.guest
+    ? en
+      ? ` with ${episode.guest}`
+      : ` con ${episode.guest}`
+    : "";
   const link = episode.youtube_url ?? "";
-  const tags = HASHTAGS[platform];
+  const tags = en ? HASHTAGS_EN[platform] : HASHTAGS[platform];
+  const ep = en ? "Episode" : "Episodio";
 
   let title: string | undefined;
   let text: string;
@@ -137,7 +198,9 @@ export function generatePost(
         "",
         cta,
         "",
-        "La Mesa del Reino — donde la fe se sienta a conversar con la vida.",
+        en
+          ? "La Mesa del Reino — where faith sits down to talk with life."
+          : "La Mesa del Reino — donde la fe se sienta a conversar con la vida.",
       ]
         .filter(Boolean)
         .join("\n");
@@ -148,7 +211,7 @@ export function generatePost(
       text = [
         `${opener}`,
         "",
-        `${episode.title}${guest}. Episodio ${episode.number}. 🎙️`,
+        `${episode.title}${guest}. ${ep} ${episode.number}. 🎙️`,
         "",
         cta,
         "",
@@ -165,7 +228,9 @@ export function generatePost(
         cta,
         link ? `\n${link}` : "",
         "",
-        "¿Qué te pareció? Cuéntanos abajo 👇",
+        en
+          ? "What did you think? Tell us below 👇"
+          : "¿Qué te pareció? Cuéntanos abajo 👇",
       ]
         .filter(Boolean)
         .join("\n");
@@ -188,7 +253,7 @@ export function generatePost(
     }
 
     case "x": {
-      const base = `${episode.title}${guest} — ep. ${episode.number}. ${cta}`;
+      const base = `${episode.title}${guest} — ${en ? "ep." : "ep."} ${episode.number}. ${cta}`;
       const room = LIMITS.x - base.length - (link ? link.length + 1 : 0) - 1;
       const tag = tags[0] && tags[0].length <= room ? ` ${tags[0]}` : "";
       text = `${base}${tag}${link ? `\n${link}` : ""}`;

@@ -9,12 +9,14 @@ import { useState, useEffect } from "react";
 import { browserClient } from "@/lib/supabase-browser";
 import { useQuery } from "@/lib/useQuery";
 import { money } from "@/lib/types";
+import { useLang } from "@/lib/i18n";
 
 type Setting = { key: string; value: string };
 
 const DAYS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 
 export default function SettingsPage() {
+  const { t } = useLang();
   const { data: rows, reload } = useQuery<Setting[]>((sb) =>
     sb.from("settings").select("*"),
   );
@@ -50,10 +52,10 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-2xl font-black tracking-tight mb-5">Ajustes</h1>
+      <h1 className="text-2xl font-black tracking-tight mb-5">{t("Ajustes")}</h1>
 
       <div className="card p-4 mb-4">
-        <Label>Presupuesto normal por semana</Label>
+        <Label>{t("Presupuesto normal por semana")}</Label>
         <input
           type="number"
           min={0}
@@ -68,7 +70,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="card p-4 mb-5">
-        <Label>Cuándo sale el programa</Label>
+        <Label>{t("Cuándo sale el programa")}</Label>
         <div className="flex gap-3">
           <select
             value={showDay}
@@ -98,7 +100,7 @@ export default function SettingsPage() {
         className="w-full py-3 rounded-full font-bold disabled:opacity-50"
         style={{ background: "var(--brass)", color: "#17130a" }}
       >
-        {busy ? "Guardando…" : saved ? "Guardado ✓" : "Guardar"}
+        {busy ? t("Guardando…") : saved ? t("Guardado ✓") : t("Guardar")}
       </button>
     </div>
   );

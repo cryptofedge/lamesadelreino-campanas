@@ -16,14 +16,22 @@ import { useQuery } from "@/lib/useQuery";
 import { generateIdeas, customIdeas, FORMATS, THEME_LIST } from "@/lib/ideas";
 import type { Format, Idea } from "@/lib/ideas";
 import type { Episode } from "@/lib/types";
+import { useLang } from "@/lib/i18n";
 
 export default function IdeasPage() {
+  const { t } = useLang();
   const router = useRouter();
   const [seed, setSeed] = useState(0);
-  // Free text, not a select. The curated themes are suggestions in a datalist,
-  // so Richard can pick one or type "matrimonio joven" and still get somewhere.
-  const [topic, setTopic] = useState("");
-  const [format, setFormat] = useState("");
+  // A visible dropdown *and* a free-text box, side by side.
+  //
+  // These were one input with a datalist, which is technically both — but
+  // browsers render that as a plain box and hide the list until you type, so
+  // the curated themes may as well not have existed. Two controls, both
+  // obvious. Typed text wins over the dropdown when both are filled.
+  const [themeSel, setThemeSel] = useState("");
+  const [topicText, setTopicText] = useState("");
+  const [formatSel, setFormatSel] = useState("");
+  const [formatText, setFormatText] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const { data: episodes } = useQuery<Episode[]>((sb) =>
@@ -36,8 +44,13 @@ export default function IdeasPage() {
   // A typed topic that matches a curated theme uses that theme's hand-written
   // questions; anything else falls through to the generic frames, which are
   // written to work on a subject nobody anticipated.
+  const topic = topicText.trim() || (THEME_LIST.find((x) => x.id === themeSel)?.label ?? "");
+  const format =
+    formatText.trim() ||
+    (formatSel ? FORMATS[formatSel as Format].label : "");
+
   const matched = THEME_LIST.find(
-    (t) => t.label.toLowerCase() === topic.trim().toLowerCase(),
+    (x) => x.label.toLowerCase() === topic.trim().toLowerCase(),
   );
   const matchedFormat = (Object.keys(FORMATS) as Format[]).find(
     (f) => FORMATS[f].label.toLowerCase() === format.trim().toLowerCase(),
@@ -88,7 +101,7 @@ export default function IdeasPage() {
         publish_at: d.toISOString(),
         youtube_url: null,
         thumbnail_url: null,
-        notes: `${idea.format} · ${idea.theme}\n\n${idea.questions
+        notes: `${t(idea.format)} · ${idea.theme}\n\n${idea.questions
           .map((q) => "— " + q)
           .join("\n")}\n\nInvitado sugerido: ${idea.guest}`,
       });
@@ -100,70 +113,89 @@ export default function IdeasPage() {
   return (
     <div className="max-w-3xl">
       <div className="flex items-center gap-3 mb-1 flex-wrap">
-        <h1 className="text-2xl font-black tracking-tight mr-auto">Ideas</h1>
+        <h1 className="text-2xl font-black tracking-tight mr-auto">{t("Ideas")}</h1>
         <button
           onClick={() => setSeed(seed + 6)}
           className="px-4 py-2 rounded-full font-bold text-sm"
           style={{ background: "var(--brass)", color: "#17130a" }}
         >
-          Otras ideas
+          {t("Otras ideas")}
         </button>
       </div>
       <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
-        Temas y preguntas para los próximos domingos. Las preguntas son lo
-        importante — el título se cambia después.
+        {t("Temas y preguntas para los próximos domingos. Las preguntas son lo importante — el título se cambia después.")}
       </p>
 
       <div className="card p-4 mb-5">
         <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "var(--faint)" }}>
-          Filtrar
+          {t("Filtrar")}
         </div>
-        <div className="flex gap-3 flex-wrap">
-          {/* Inputs with a datalist, not selects: pick a suggestion or type
-              anything. The list stops it being a blank box. */}
-          <input
-            list="temas"
-            value={topic}
-            placeholder="Tema — escribe el tuyo o escoge"
-            onChange={(e) => setTopic(e.target.value)}
-            style={{ flex: "1 1 200px", width: "auto" }}
-          />
-          <datalist id="temas">
-            {THEME_LIST.map((t) => (
-              <option key={t.id} value={t.label} />
-            ))}
-          </datalist>
+        <div className="grid gap-3 sm:grid-cols-2 mb-1">
+          <div>
+            <select
+              value={themeSel}
+              onChange={(e) => {
+                setThemeSel(e.target.value);
+                setTopicText("");
+              }}
+              className="mb-2"
+            >
+              <option value="">{t("Cualquier tema")}</option>
+              {THEME_LIST.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.label}
+                </option>
+              ))}
+            </select>
+            <input
+              value={topicText}
+              placeholder={t("…o escribe tu propio tema")}
+              onChange={(e) => setTopicText(e.target.value)}
+            />
+          </div>
 
-          <input
-            list="formatos"
-            value={format}
-            placeholder="Formato — o el tuyo"
-            onChange={(e) => setFormat(e.target.value)}
-            style={{ flex: "1 1 160px", width: "auto" }}
-          />
-          <datalist id="formatos">
-            {(Object.keys(FORMATS) as Format[]).map((f) => (
-              <option key={f} value={FORMATS[f].label} />
-            ))}
-          </datalist>
+          <div>
+            <select
+              value={formatSel}
+              onChange={(e) => {
+                setFormatSel(e.target.value);
+                setFormatText("");
+              }}
+              className="mb-2"
+            >
+              <option value="">{t("Cualquier formato")}</option>
+              {(Object.keys(FORMATS) as Format[]).map((f) => (
+                <option key={f} value={f}>
+                  {FORMATS[f].label}
+                </option>
+              ))}
+            </select>
+            <input
+              value={formatText}
+              placeholder={t("…o el tuyo")}
+              onChange={(e) => setFormatText(e.target.value)}
+            />
+          </div>
         </div>
 
         {topic.trim() && !matched && (
           <p className="text-xs mt-3" style={{ color: "var(--brass)" }}>
-            Tema tuyo: “{topic.trim()}”. Las preguntas se arman para cualquier
-            tema — ajústalas a tu manera antes de grabar.
+            {t("Tema tuyo")}: “{topic.trim()}”.{" "}
+            {t("Las preguntas se arman para cualquier tema — ajústalas a tu manera antes de grabar.")}
           </p>
         )}
         {(topic.trim() || format.trim()) && (
           <button
             onClick={() => {
-              setTopic("");
-              setFormat("");
+              setThemeSel("");
+              setTopicText("");
+              setFormatSel("");
+              setFormatText("");
             }}
             className="text-xs mt-3 px-3 py-1.5 rounded-full font-semibold"
             style={{ background: "var(--surface-3)", color: "var(--muted)" }}
           >
-            Limpiar
+            {t("Limpiar")}
           </button>
         )}
       </div>
@@ -176,7 +208,7 @@ export default function IdeasPage() {
                 {idea.theme}
               </span>
               <span className="chip" style={{ color: "var(--muted)" }}>
-                {idea.format}
+                {t(idea.format)}
               </span>
             </div>
 
@@ -198,7 +230,7 @@ export default function IdeasPage() {
             </ul>
 
             <p className="text-xs mb-3" style={{ color: "var(--faint)" }}>
-              <strong style={{ color: "var(--muted)" }}>Invitado:</strong>{" "}
+              <strong style={{ color: "var(--muted)" }}>{t("Invitado")}:</strong>{" "}
               {idea.guest}
             </p>
 
@@ -209,7 +241,7 @@ export default function IdeasPage() {
                 className="text-xs px-3 py-1.5 rounded-full font-semibold disabled:opacity-50"
                 style={{ background: "var(--surface-3)", color: "var(--text)" }}
               >
-                Guardar
+                {t("Guardar")}
               </button>
               <button
                 onClick={() => void schedule(idea)}
@@ -217,7 +249,7 @@ export default function IdeasPage() {
                 className="text-xs px-3 py-1.5 rounded-full font-semibold disabled:opacity-50"
                 style={{ background: "var(--brass)", color: "#17130a" }}
               >
-                Programar como Ep. {nextNumber}
+                {t("Programar como Ep.")} {nextNumber}
               </button>
               <button
                 onClick={() =>
@@ -228,7 +260,7 @@ export default function IdeasPage() {
                 className="text-xs px-3 py-1.5 rounded-full font-semibold"
                 style={{ background: "var(--surface-3)", color: "var(--text)" }}
               >
-                Copiar
+                {t("Copiar")}
               </button>
             </div>
           </div>
@@ -241,7 +273,7 @@ export default function IdeasPage() {
             className="text-sm font-bold uppercase tracking-wider mb-3"
             style={{ color: "var(--faint)" }}
           >
-            Guardadas ({(saved ?? []).length})
+            {t("Guardadas")} ({(saved ?? []).length})
           </h2>
           <div className="space-y-2">
             {(saved ?? []).map((s) => (
@@ -257,11 +289,9 @@ export default function IdeasPage() {
       )}
 
       <div className="card p-4">
-        <p className="text-sm font-bold mb-1">Sobre los versículos</p>
+        <p className="text-sm font-bold mb-1">{t("Sobre los versículos")}</p>
         <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
-          Aquí no salen citas bíblicas a propósito. Un versículo mal citado hace
-          más daño que no citarlo, y esa parte la pone Richard. Esto solo trae
-          el tema y las preguntas.
+          {t("Aquí no salen citas bíblicas a propósito. Un versículo mal citado hace más daño que no citarlo, y esa parte la pone Richard. Esto solo trae el tema y las preguntas.")}
         </p>
       </div>
     </div>

@@ -16,6 +16,7 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const LINKS: { href: string; label: string; ownerOnly?: boolean }[] = [
   { href: "/campanas", label: "Campañas" },
+  { href: "/generador", label: "Generador" },
   { href: "/episodios", label: "Episodios" },
   { href: "/calendario", label: "Calendario" },
   { href: "/conexiones", label: "Conexiones", ownerOnly: true },

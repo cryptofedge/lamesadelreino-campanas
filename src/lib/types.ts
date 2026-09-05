@@ -113,14 +113,39 @@ export interface Profile {
 
 export const PLATFORMS: Record<
   Platform,
-  { label: string; short: string; color: string; organic: boolean; paid: boolean }
+  {
+    label: string;
+    short: string;
+    color: string;
+    organic: boolean;
+    paid: boolean;
+    /** Where the money is actually spent, which is not always the same brand. */
+    adProduct: string;
+  }
 > = {
-  youtube:   { label: "YouTube",   short: "YT", color: "#ff4444", organic: true,  paid: true  },
-  instagram: { label: "Instagram", short: "IG", color: "#e1499a", organic: true,  paid: true  },
-  facebook:  { label: "Facebook",  short: "FB", color: "#4a8cff", organic: true,  paid: true  },
-  tiktok:    { label: "TikTok",    short: "TT", color: "#3ad9d1", organic: true,  paid: true  },
-  x:         { label: "X",         short: "X",  color: "#c9c9d4", organic: true,  paid: false },
+  youtube:   { label: "YouTube",   short: "YT", color: "#ff4444", organic: true, paid: true,  adProduct: "Google Ads" },
+  instagram: { label: "Instagram", short: "IG", color: "#e1499a", organic: true, paid: true,  adProduct: "Meta Ads" },
+  facebook:  { label: "Facebook",  short: "FB", color: "#4a8cff", organic: true, paid: true,  adProduct: "Meta Ads" },
+  tiktok:    { label: "TikTok",    short: "TT", color: "#3ad9d1", organic: true, paid: true,  adProduct: "TikTok Ads / Promote" },
+  x:         { label: "X",         short: "X",  color: "#c9c9d4", organic: true, paid: false, adProduct: "—" },
 };
+
+/**
+ * Every account this console could use, whether or not a row exists for it.
+ *
+ * The connections page derives its list from here rather than from whatever
+ * happens to be in the database. Rendering only existing rows meant a platform
+ * with no row vanished from a page whose entire job is saying what is missing —
+ * TikTok ads disappeared exactly that way.
+ */
+export function expectedConnections(): { platform: Platform; kind: PlacementKind }[] {
+  const out: { platform: Platform; kind: PlacementKind }[] = [];
+  for (const p of Object.keys(PLATFORMS) as Platform[]) {
+    if (PLATFORMS[p].organic) out.push({ platform: p, kind: "organic" });
+    if (PLATFORMS[p].paid) out.push({ platform: p, kind: "paid" });
+  }
+  return out;
+}
 
 export const GOALS: Record<Goal, { label: string; hint: string }> = {
   views:       { label: "Más vistas",       hint: "Que el episodio se vea. Lo normal cada semana." },

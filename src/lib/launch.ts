@@ -70,7 +70,11 @@ export const ADAPTERS: Record<Platform, Adapter> = {
   },
   tiktok: {
     apiReady: false,
-    blocker: "TikTok Ads API: falta aprobación de la app en TikTok for Business.",
+    // TikTok is the one platform with a no-approval route: Promote boosts an
+    // already-published video from inside the phone app. Worth naming, because
+    // it is genuinely the fastest way to put money behind a clip this week.
+    blocker:
+      "TikTok Ads API: falta aprobación de la app en TikTok for Business. Alternativa sin permisos: usa Promote dentro de la app sobre el video ya publicado.",
     managerUrl: "https://ads.tiktok.com/i18n/perf/campaign",
   },
   x: {

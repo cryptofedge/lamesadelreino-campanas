@@ -228,6 +228,20 @@ const connections = [
       "Falta el developer token aprobado de Google Ads en la cuenta de administrador.",
     last_checked: at(0, 8),
   },
+  {
+    id: "cx-ig-p", platform: "instagram", kind: "paid",
+    account_name: "Meta Ads — Instagram", connected: false,
+    blocked_reason:
+      "Los anuncios de Instagram se compran por Meta: mismo App Review que Facebook.",
+    last_checked: at(0, 8),
+  },
+  {
+    id: "cx-tt-p", platform: "tiktok", kind: "paid",
+    account_name: "TikTok Ads — La Mesa del Reino", connected: false,
+    blocked_reason:
+      "Falta aprobación de la app en TikTok for Business para comprar anuncios desde aquí.",
+    last_checked: at(0, 8),
+  },
 ];
 
 const profiles = DEMO_USERS.map((u) => ({

@@ -19,6 +19,7 @@ import { browserClient } from "@/lib/supabase-browser";
 import { buildPrompt, botMessage, waLink, MEDIA_KINDS } from "@/lib/media";
 import type { MediaKind } from "@/lib/media";
 import ShareButton from "@/components/ShareButton";
+import ImageEditor from "@/components/ImageEditor";
 import type { Campaign, Episode, Platform } from "@/lib/types";
 
 type Mode = "generar" | "subir";
@@ -47,6 +48,7 @@ export default function MediaStudio({
   const [preview, setPreview] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [attached, setAttached] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const prompt = buildPrompt(kind, idea, episode?.title);
@@ -62,7 +64,32 @@ export default function MediaStudio({
       return url;
     });
     setAttached(null);
+    setEditing(false);
     onCreative?.({ url, name: f.name, video: f.type.startsWith("video/") });
+  }
+
+  /** Throw the upload away. The wrong file picked in a hurry is the normal
+   *  case, and without this the only way out is reloading the page. */
+  function clearFile() {
+    if (preview) URL.revokeObjectURL(preview);
+    setFile(null);
+    setPreview("");
+    setAttached(null);
+    setEditing(false);
+    // The input keeps its value, so re-picking the *same* file would fire no
+    // change event and look broken.
+    if (fileRef.current) fileRef.current.value = "";
+    onCreative?.(null);
+  }
+
+  /** Replace the upload with the cropped version. */
+  function applyEdit(f: File, url: string) {
+    if (preview) URL.revokeObjectURL(preview);
+    setFile(f);
+    setPreview(url);
+    setEditing(false);
+    setAttached(null);
+    onCreative?.({ url, name: f.name, video: false });
   }
 
   /** Put the uploaded file on a campaign as the creative for a new post. */
@@ -227,7 +254,16 @@ export default function MediaStudio({
             style={{ padding: 8 }}
           />
 
-          {preview && (
+          {preview && editing && !isVideo && (
+            <ImageEditor
+              src={preview}
+              fileName={file?.name ?? "imagen.jpg"}
+              onDone={applyEdit}
+              onCancel={() => setEditing(false)}
+            />
+          )}
+
+          {preview && !editing && (
             <div className="mb-3">
               {isVideo ? (
                 <video
@@ -244,9 +280,37 @@ export default function MediaStudio({
                   style={{ border: "1px solid var(--line)" }}
                 />
               )}
-              <p className="text-xs mt-2" style={{ color: "var(--faint)" }}>
-                {file?.name} · {Math.round((file?.size ?? 0) / 1024)} KB
-              </p>
+
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className="text-xs" style={{ color: "var(--faint)" }}>
+                  {file?.name} · {Math.round((file?.size ?? 0) / 1024)} KB
+                </span>
+
+                {!isVideo && (
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="text-xs px-3 py-1.5 rounded-full font-semibold"
+                    style={{ background: "var(--surface-3)", color: "var(--text)" }}
+                  >
+                    Recortar
+                  </button>
+                )}
+
+                <button
+                  onClick={clearFile}
+                  className="text-xs px-3 py-1.5 rounded-full font-semibold"
+                  style={{ background: "transparent", color: "var(--red)", border: "1px solid var(--line)" }}
+                >
+                  Quitar
+                </button>
+              </div>
+
+              {isVideo && (
+                <p className="text-xs mt-2" style={{ color: "var(--faint)" }}>
+                  Los videos no se recortan aquí. Para cortar o subtitular,
+                  pídeselo al bot con #elmini.
+                </p>
+              )}
             </div>
           )}
 

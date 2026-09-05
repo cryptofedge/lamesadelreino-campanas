@@ -1,0 +1,272 @@
+/**
+ * A stand-in for the Supabase client, for the client-facing demo.
+ *
+ * The console reads and writes through a small, closed slice of the Supabase
+ * API — select/eq/gte/in/order/single, update/insert/upsert, and one realtime
+ * channel. This implements exactly that slice against in-memory data, so the
+ * demo build needs no database, no keys, and no network.
+ *
+ * Edits are real within the session: change a price, toggle a dish, move stock,
+ * and the console reflects it. Reloading the page puts everything back, which
+ * is what you want from something handed to a client to poke at.
+ */
+import { seed, DEMO_USERS } from "./demo-data";
+
+type Row = Record<string, unknown>;
+
+// Deep copy so a demo session's edits never mutate the module-level seed.
+const store: Record<string, Row[]> = JSON.parse(JSON.stringify(seed));
+
+const SESSION_KEY = "mesa-demo-user";
+
+function readSession(): string | null {
+  try {
+    return localStorage.getItem(SESSION_KEY);
+  } catch {
+    return null; // Private mode, or storage disabled.
+  }
+}
+
+const listeners = new Set<() => void>();
+function notify() {
+  listeners.forEach((fn) => fn());
+}
+
+type Filter = { col: string; op: "eq" | "gte" | "in"; val: unknown };
+
+function matches(row: Row, f: Filter): boolean {
+  const v = row[f.col];
+  if (f.op === "eq") return v === f.val;
+  if (f.op === "in") return (f.val as unknown[]).includes(v);
+  // gte on ISO date strings compares correctly lexicographically.
+  return String(v) >= String(f.val);
+}
+
+class Query implements PromiseLike<{ data: unknown; error: null }> {
+  private filters: Filter[] = [];
+  private sortBy: { col: string; asc: boolean } | null = null;
+  private one = false;
+
+  constructor(private table: string) {}
+
+  select() { return this; }
+  eq(col: string, val: unknown) { this.filters.push({ col, op: "eq", val }); return this; }
+  gte(col: string, val: unknown) { this.filters.push({ col, op: "gte", val }); return this; }
+  in(col: string, val: unknown[]) { this.filters.push({ col, op: "in", val }); return this; }
+  order(col: string, opts?: { ascending?: boolean }) {
+    this.sortBy = { col, asc: opts?.ascending !== false };
+    return this;
+  }
+  single() { this.one = true; return this; }
+
+  private rows(): Row[] {
+    let out = (store[this.table] ?? []).filter((r) => this.filters.every((f) => matches(r, f)));
+
+    // PostgREST embeds a child table when the select asks for it. The fixtures
+    // keep placements in their own array, so join them on the way out rather
+    // than duplicating every placement inside its campaign.
+    if (this.table === "campaigns") {
+      out = out.map((c) => ({
+        ...c,
+        placements: (store.placements ?? []).filter((p) => p.campaign_id === c.id),
+      }));
+    }
+    if (this.sortBy) {
+      const { col, asc } = this.sortBy;
+      out = [...out].sort((a, b) => {
+        const x = a[col] as string | number, y = b[col] as string | number;
+        return (x > y ? 1 : x < y ? -1 : 0) * (asc ? 1 : -1);
+      });
+    }
+    return out;
+  }
+
+  then<R1, R2 = never>(
+    ok?: ((v: { data: unknown; error: null }) => R1 | PromiseLike<R1>) | null,
+    fail?: ((r: unknown) => R2 | PromiseLike<R2>) | null,
+  ): PromiseLike<R1 | R2> {
+    const rows = this.rows();
+    // A touch of latency, so loading states are visible rather than a flash.
+    return new Promise<{ data: unknown; error: null }>((res) =>
+      setTimeout(() => res({ data: this.one ? (rows[0] ?? null) : rows, error: null }), 120),
+    ).then(ok, fail);
+  }
+}
+
+class Mutation implements PromiseLike<{ data: unknown; error: null }> {
+  private filters: Filter[] = [];
+  private returning = false;
+  private one = false;
+  private inserted: Row[] = [];
+  constructor(
+    private table: string,
+    private kind: "update" | "insert" | "upsert" | "delete",
+    private payload: Row | Row[],
+  ) {}
+
+  eq(col: string, val: unknown) { this.filters.push({ col, op: "eq", val }); return this; }
+
+  // insert(...).select("id").single() — the new-item form needs the id back so
+  // it can log the opening stock count against it.
+  select() { this.returning = true; return this; }
+  single() { this.returning = true; this.one = true; return this; }
+
+  private apply() {
+    const list = (store[this.table] ??= []);
+
+    if (this.kind === "delete") {
+      const keep = list.filter((r) => !this.filters.every((f) => matches(r, f)));
+      store[this.table] = keep;
+      // Deleting a campaign takes its placements with it, the same as the
+      // foreign key's `on delete cascade` does.
+      if (this.table === "campaigns") {
+        const gone = list.filter((r) => this.filters.every((f) => matches(r, f))).map((r) => r.id);
+        store.placements = (store.placements ?? []).filter((p) => !gone.includes(p.campaign_id));
+      }
+      return;
+    }
+
+    if (this.kind === "update") {
+      // Approving a campaign stamps whoever approved it, the same as the
+      // database trigger does — otherwise the demo shows the column empty.
+      const stamping =
+        this.table === "campaigns" && Object.keys(this.payload).includes("status");
+      const me = stamping
+        ? DEMO_USERS.find((u) => u.id === readSession())?.full_name ?? null
+        : null;
+
+      list.forEach((r) => {
+        if (!this.filters.every((f) => matches(r, f))) return;
+        Object.assign(r, this.payload);
+        if (me) r.approved_by_name = me;
+      });
+
+      // Publishing is genuinely asynchronous: the bot calls the ad platform and
+      // writes back. Stand in for that round trip so "Publicando…" is a state
+      // the client sees resolve, rather than one that never changes.
+      if (this.table === "campaigns" && (this.payload as Row).status === "publishing") {
+        const target = list.find((r) => this.filters.every((f) => matches(r, f)));
+        if (target) {
+          setTimeout(() => {
+            target.status = "active";
+            target.external_id = "2385" + Math.floor(1000 + Math.random() * 8999);
+            target.synced_at = new Date().toISOString();
+          }, 2600);
+        }
+      }
+      return;
+    }
+
+    const items = Array.isArray(this.payload) ? this.payload : [this.payload];
+    for (const item of items) {
+      // upsert matches on id for most tables, on key for settings.
+      const idKey = this.table === "settings" ? "key" : "id";
+      const existing = this.kind === "upsert"
+        ? list.find((r) => r[idKey] !== undefined && r[idKey] === item[idKey])
+        : undefined;
+      if (existing) { Object.assign(existing, item); this.inserted.push(existing); }
+      else {
+        const row = { id: `demo-${Math.random().toString(36).slice(2, 9)}`, ...item };
+        // A new placement starts with no results, exactly as the real row does
+        // before the platform has reported anything back.
+        if (this.table === "placements") {
+          Object.assign(row, {
+            reach: null, clicks: null, spend: null, external_id: null,
+            status: (item as Row).status ?? "draft",
+          });
+        }
+        list.push(row);
+        this.inserted.push(row);
+      }
+    }
+  }
+
+  then<R1, R2 = never>(
+    ok?: ((v: { data: unknown; error: null }) => R1 | PromiseLike<R1>) | null,
+    fail?: ((r: unknown) => R2 | PromiseLike<R2>) | null,
+  ): PromiseLike<R1 | R2> {
+    return new Promise<{ data: unknown; error: null }>((res) =>
+      setTimeout(() => {
+        this.apply();
+        const data = !this.returning ? null : this.one ? (this.inserted[0] ?? null) : this.inserted;
+        res({ data, error: null });
+      }, 140),
+    ).then(ok, fail);
+  }
+}
+
+export function demoClient() {
+  return {
+    from(table: string) {
+      return {
+        select: () => new Query(table),
+        update: (payload: Row) => new Mutation(table, "update", payload),
+        insert: (payload: Row | Row[]) => new Mutation(table, "insert", payload),
+        upsert: (payload: Row | Row[]) => new Mutation(table, "upsert", payload),
+        delete: () => new Mutation(table, "delete", {}),
+      };
+    },
+
+    auth: {
+      async signInWithPassword({ email, password }: { email: string; password: string }) {
+        await new Promise((r) => setTimeout(r, 350));
+        const u = DEMO_USERS.find(
+          (x) => x.email.toLowerCase() === email.trim().toLowerCase() && x.password === password,
+        );
+        if (!u) return { data: null, error: { message: "Invalid login credentials" } };
+        try { localStorage.setItem(SESSION_KEY, u.id); } catch {}
+        notify();
+        return { data: { user: { id: u.id } }, error: null };
+      },
+
+      async getUser() {
+        const id = readSession();
+        return { data: { user: id ? { id } : null }, error: null };
+      },
+
+      async signOut() {
+        try { localStorage.removeItem(SESSION_KEY); } catch {}
+        notify();
+        return { error: null };
+      },
+
+      onAuthStateChange(cb: () => void) {
+        listeners.add(cb);
+        return { data: { subscription: { unsubscribe: () => listeners.delete(cb) } } };
+      },
+    },
+
+    /**
+     * Storage, faked with an object URL.
+     *
+     * The demo has no bucket to upload to, but the client will absolutely try
+     * the "Subir foto" button — and a picker that accepts a file and then shows
+     * nothing reads as broken. The chosen file is turned into a local URL so the
+     * new photo appears immediately, for as long as the page stays open.
+     */
+    storage: {
+      from() {
+        let lastUrl = "";
+        return {
+          async upload(path: string, file: File) {
+            await new Promise((r) => setTimeout(r, 600));
+            lastUrl = URL.createObjectURL(file);
+            return { data: { path }, error: null };
+          },
+          getPublicUrl() {
+            return { data: { publicUrl: lastUrl } };
+          },
+        };
+      },
+    },
+
+    // The order board subscribes to postgres_changes and reloads on any event.
+    // Nothing external changes in a demo, so this is a no-op that satisfies the
+    // same shape.
+    channel() {
+      const ch = { on: () => ch, subscribe: () => ch };
+      return ch;
+    },
+    removeChannel() {},
+  };
+}

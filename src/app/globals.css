@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* La Mesa del Reino — campaign desk.
+
+   Deliberately not Go Picadera's yellow-on-black. Same bones, same density,
+   but this is a different business and the person using it should never be
+   confused about which console they are in. Kingdom -> deep violet and a warm
+   brass, which also reads as "broadcast desk" rather than "restaurant". */
+:root {
+  --ink: #0b0a10;
+  --surface: #15131d;
+  --surface-2: #1d1a28;
+  --surface-3: #272235;
+  --line: rgba(255, 255, 255, 0.09);
+  --line-warm: rgba(214, 168, 84, 0.24);
+
+  --brass: #d6a854;
+  --violet: #8b6cf0;
+  --green: #3fd07a;
+  --amber: #ffb020;
+  --red: #ff5468;
+
+  --text: #f4f2f7;
+  --muted: #9b98a8;
+  --faint: #6a6776;
+}
+
+html, body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Tabular figures wherever money, reach or counts appear — columns of digits
+   that don't line up are genuinely harder to scan. */
+.nums { font-variant-numeric: tabular-nums; }
+
+/* One card style, used everywhere, so the app doesn't drift into six
+   near-identical panels. */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+}
+
+input, select, textarea {
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 14px;
+  width: 100%;
+  font-size: 15px;
+}
+
+input::placeholder, textarea::placeholder { color: var(--faint); }
+
+label { display: block; }
+
+/* The whole app is a tool, not a page: never let a stray wide table push the
+   body sideways on a phone. */
+body { overflow-x: hidden; }

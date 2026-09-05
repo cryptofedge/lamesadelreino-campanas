@@ -1,0 +1,91 @@
+name: Deploy campaign console to GitHub Pages
+
+# Builds the static export and publishes it. Pages must be set to build from
+# "GitHub Actions" (Settings -> Pages -> Source), not from a branch.
+#
+# This currently ships the DEMO build: no Supabase project is wired up yet, so
+# the console runs against in-memory fixtures. When the real project exists,
+# set the two repository secrets and flip DEMO to "0" below — nothing else here
+# has to change.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race. Queue instead of cancelling, so a push that lands
+# mid-deploy still ships rather than being silently dropped.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  DEMO: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # A real build must not silently fall back to fixtures. Check before
+      # building, because a missing secret becomes an empty string that compiles
+      # happily and then fails in the visitor's browser on the first query.
+      - name: Require Supabase credentials when not a demo
+        if: env.DEMO != '1'
+        env:
+          SUPA_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPA_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          [ -n "$SUPA_URL" ] || { echo "::error::NEXT_PUBLIC_SUPABASE_URL is not set."; exit 1; }
+          [ -n "$SUPA_KEY" ] || { echo "::error::NEXT_PUBLIC_SUPABASE_ANON_KEY is not set."; exit 1; }
+          # Two shapes are valid: `eyJ...` is the legacy JWT anon key, and
+          # Supabase now issues `sb_publishable_...` instead.
+          case "$SUPA_KEY" in
+            eyJ*|sb_publishable_*) ;;
+            *) echo "::error::Key does not look like a Supabase publishable/anon key."; exit 1 ;;
+          esac
+
+      - run: npm run build
+        env:
+          # Served from cryptofedge.github.io/lamesadelreino-campanas, so every
+          # asset and link needs the repo name in front of it. Set this to ""
+          # the day it moves to a domain root.
+          NEXT_BASE_PATH: "/lamesadelreino-campanas"
+          NEXT_PUBLIC_DEMO: ${{ env.DEMO }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      # Jekyll strips any directory beginning with an underscore, which would
+      # take _next with it and leave a page with no JavaScript at all.
+      - name: Guard the export
+        run: |
+          touch out/.nojekyll
+          test -f out/index.html || { echo "::error::out/index.html missing — the export did not run."; exit 1; }
+          test -d out/_next     || { echo "::error::out/_next missing."; exit 1; }
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

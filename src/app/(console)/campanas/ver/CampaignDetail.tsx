@@ -172,11 +172,41 @@ export default function CampaignDetail() {
                 </span>
               </div>
 
-              <p className="text-sm mb-3" style={{ color: "var(--text)" }}>
-                {p.copy || (
-                  <span style={{ color: "var(--faint)" }}>Sin texto todavía</span>
+              <div className="flex gap-3 mb-3">
+                {/* A post with no creative is a post somebody still has to
+                    finish, so the gap is shown rather than left implicit. */}
+                {p.creative_url ? (
+                  <img
+                    src={p.creative_url}
+                    alt=""
+                    className="h-14 w-14 rounded-lg object-cover shrink-0"
+                    style={{ border: "1px solid var(--line)" }}
+                    // A stored filename from a seeded row is not a real URL;
+                    // hide the broken icon rather than showing it.
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="h-14 w-14 rounded-lg shrink-0 grid place-items-center text-[10px] text-center leading-tight"
+                    style={{
+                      border: "1px dashed var(--line)",
+                      color: "var(--faint)",
+                    }}
+                  >
+                    sin
+                    <br />
+                    imagen
+                  </div>
                 )}
-              </p>
+
+                <p className="text-sm" style={{ color: "var(--text)" }}>
+                  {p.copy || (
+                    <span style={{ color: "var(--faint)" }}>Sin texto todavía</span>
+                  )}
+                </p>
+              </div>
 
               {(p.reach !== null || p.clicks !== null) && (
                 <div className="flex gap-4 text-xs mb-3 nums" style={{ color: "var(--muted)" }}>

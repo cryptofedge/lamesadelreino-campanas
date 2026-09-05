@@ -35,6 +35,13 @@ export default function GeneratorPage() {
   const [goal, setGoal] = useState<Goal>("views");
   const [edited, setEdited] = useState<Record<number, string>>({});
   const [savedTo, setSavedTo] = useState<string | null>(null);
+  // The picture chosen below, so a post saved from here goes out complete
+  // rather than as text somebody has to finish somewhere else.
+  const [creative, setCreative] = useState<{
+    url: string;
+    name: string;
+    video: boolean;
+  } | null>(null);
 
   const list = episodes ?? [];
   const ep = list.find((e) => e.id === episodeId) ?? list[0];
@@ -70,7 +77,7 @@ export default function GeneratorPage() {
         budget: null,
         run_at: ep.publish_at,
         copy: textFor(i),
-        creative_url: null,
+        creative_url: creative?.url ?? null,
       });
     setSavedTo(campaignId);
     setTimeout(() => router.push(`/campanas/ver?id=${campaignId}`), 700);
@@ -197,6 +204,30 @@ export default function GeneratorPage() {
                 </p>
               )}
 
+              {/* Show what will actually go out with this post, so nobody
+                  saves text believing a picture is attached when none is. */}
+              {creative && (
+                <div className="flex items-center gap-2 mt-3">
+                  {creative.video ? (
+                    <video
+                      src={creative.url}
+                      className="h-12 w-12 rounded-lg object-cover"
+                      style={{ border: "1px solid var(--line)" }}
+                    />
+                  ) : (
+                    <img
+                      src={creative.url}
+                      alt=""
+                      className="h-12 w-12 rounded-lg object-cover"
+                      style={{ border: "1px solid var(--line)" }}
+                    />
+                  )}
+                  <span className="text-xs" style={{ color: "var(--muted)" }}>
+                    Va con {creative.name}
+                  </span>
+                </div>
+              )}
+
               <div className="flex gap-2 mt-3 flex-wrap">
                 <button
                   onClick={() => void navigator.clipboard?.writeText(value)}
@@ -231,17 +262,12 @@ export default function GeneratorPage() {
         })}
       </div>
 
-      <h2
-        className="text-sm font-bold uppercase tracking-wider mb-3"
-        style={{ color: "var(--faint)" }}
-      >
-        Imagen y video
-      </h2>
       <div className="mb-6">
         <MediaStudio
           episode={ep}
           campaigns={campaigns ?? []}
           platform={platform}
+          onCreative={setCreative}
         />
       </div>
 

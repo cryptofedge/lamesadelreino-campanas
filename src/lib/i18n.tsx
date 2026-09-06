@@ -19,6 +19,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { setDateLocale } from "./types";
 
 export type Lang = "es" | "en";
 
@@ -270,6 +271,214 @@ const EN: Record<string, string> = {
     "Opens in Apple Calendar, Google, or any other.",
   "Anuncio": "Ad",
   "Post": "Post",
+
+  /* Data tables and hints that used to bypass t(). */
+  "¿Qué buscamos?":
+    "What are we after?",
+  "Presupuesto de anuncios":
+    "Ad budget",
+  "Dónde sale":
+    "Where it goes",
+  "Crear campaña":
+    "Create campaign",
+  "Creando…":
+    "Creating…",
+  "Se crea como borrador. Nada sale ni se gasta hasta que la apruebes.":
+    "It's created as a draft. Nothing goes out until you approve it.",
+  "Escoge un episodio.":
+    "Pick an episode.",
+  "Escoge al menos una plataforma.":
+    "Pick at least one platform.",
+  "No se pudo crear la campaña.":
+    "The campaign couldn't be created.",
+  "Ninguna plataforma está marcada como pagada todavía.":
+    "No platform is marked as paid yet.",
+  "No":
+    "No",
+  "Se reparte entre":
+    "Split across",
+  "plataforma":
+    "platform",
+  "plataformas":
+    "platforms",
+  "Que el episodio se vea. Lo normal cada semana.":
+    "Get the episode watched. The normal week.",
+  "Crecer el canal, no solo un episodio.":
+    "Grow the channel, not just one episode.",
+  "Cuando hay culto, invitado o algo presencial.":
+    "When there's a service, a guest, or something in person.",
+  "Gente nueva que nunca ha oído del programa.":
+    "New people who have never heard the show.",
+  "Todavía no se puede lanzar solo.":
+    "This can't launch on its own yet.",
+  "Mientras tanto, aquí está todo listo para pegarlo en un minuto.":
+    "In the meantime, everything here is ready to paste in a minute.",
+  "Abrir":
+    "Open",
+  "Abre con algo que la gente se pregunta.":
+    "Open with something people wonder about.",
+  "Una línea fuerte del episodio.":
+    "A strong line from the episode.",
+  "Directo: míralo, aquí está.":
+    "Straight up: here it is, watch it.",
+  "Antes de que salga, para crear expectativa.":
+    "Before it drops, to build anticipation.",
+  "Días después, para los que no lo vieron.":
+    "Days later, for whoever missed it.",
+  "Richard y la mesa, sin invitado.":
+    "Richard and the table, no guest.",
+  "Alguien que vivió el tema de cerca.":
+    "Someone who lived it up close.",
+  "Una historia contada de principio a fin.":
+    "One story told start to finish.",
+  "Lo que manda la gente durante la semana.":
+    "What people send in during the week.",
+  "Un tema partido en tres o cuatro domingos.":
+    "One topic split across three or four Sundays.",
+  "Fe y trabajo":
+    "Faith and work",
+  "Familia":
+    "Family",
+  "Dinero":
+    "Money",
+  "Ansiedad y salud mental":
+    "Anxiety and mental health",
+  "Dudas":
+    "Doubts",
+  "Comunidad":
+    "Community",
+  "Propósito":
+    "Purpose",
+  "Perdón":
+    "Forgiveness",
+  "Jóvenes":
+    "Young people",
+  "Servir":
+    "Serving",
+  "Para YouTube.":
+    "For YouTube.",
+  "Listo en segundos.":
+    "Ready in seconds.",
+  "El video toma bastante más que una imagen — confírmalo con Richard antes.":
+    "Video takes considerably longer than an image — check with Richard first.",
+  "Falta el developer token aprobado de Google Ads en la cuenta de administrador.":
+    "The approved Google Ads developer token is missing on the manager account.",
+  "Los anuncios de Instagram se compran por Meta: mismo App Review que Facebook.":
+    "Instagram ads are bought through Meta: the same App Review as Facebook.",
+  "Falta App Review y verificación del negocio en Meta. Se solicita una vez y tarda días.":
+    "Meta App Review and business verification are missing. You apply once and it takes days.",
+  "Falta aprobación de la app en TikTok for Business para comprar anuncios desde aquí.":
+    "App approval in TikTok for Business is missing before ads can be bought from here.",
+  "Falta crear la cuenta de anunciante en ads.x.com y cargar método de pago.":
+    "An advertiser account at ads.x.com and a payment method still need setting up.",
+  "Cita para Instagram.":
+    "A quote card for Instagram.",
+  "Vertical, IG o TikTok.":
+    "Vertical, IG or TikTok.",
+  "Video corto generado.":
+    "A short generated video.",
+  "¿Qué quieres ver? Ej: una mesa vacía con dos tazas y luz de ventana":
+    "What do you want to see? e.g. an empty table, two cups, window light",
+  "El bot la genera y te la manda por WhatsApp. Aquí no se puede generar directamente: esta página es pública y la clave quedaría a la vista.":
+    "The bot generates it and sends it to you on WhatsApp. It can't be generated here: this page is public and the key would be exposed.",
+  "¿Quieres algo más suelto?":
+    "Want something looser?",
+  "Los videos no se recortan aquí. Para cortar o subtitular, pídeselo al bot con #elmini.":
+    "Videos aren't cropped here. For cutting or subtitles, ask the bot with #elmini.",
+  "domingo":
+    "Sunday",
+  "lunes":
+    "Monday",
+  "martes":
+    "Tuesday",
+  "miércoles":
+    "Wednesday",
+  "jueves":
+    "Thursday",
+  "viernes":
+    "Friday",
+  "sábado":
+    "Saturday",
+  "Todos":
+    "All",
+  "Mujeres":
+    "Women",
+  "Hombres":
+    "Men",
+  "Ninguna":
+    "None",
+  "Crédito":
+    "Credit",
+  "Empleo":
+    "Employment",
+  "Vivienda":
+    "Housing",
+  "Temas sociales, elecciones o política":
+    "Social issues, elections or politics",
+  "Productos y servicios financieros":
+    "Financial products and services",
+  "Meta — Facebook e Instagram":
+    "Meta — Facebook and Instagram",
+  "ID de cuenta publicitaria":
+    "Ad account ID",
+  "Empieza con act_. En Meta Business Suite → Configuración.":
+    "Starts with act_. In Meta Business Suite → Settings.",
+  "ID del negocio (Business Manager)":
+    "Business ID (Business Manager)",
+  "Sin esto no se puede verificar el negocio ni pedir permisos.":
+    "Without this the business can't be verified or permissions requested.",
+  "Página de Facebook":
+    "Facebook Page",
+  "Meta exige una página para correr anuncios. Los de Instagram también salen de aquí.":
+    "Meta requires a Page to run ads. Instagram ads come from here too.",
+  "Cuenta de Instagram":
+    "Instagram account",
+  "Debe estar conectada a la página. Si falta, los anuncios salen solo en Facebook.":
+    "It must be connected to the Page. Without it, ads run on Facebook only.",
+  "Solo si algún día se mide una acción en el sitio. Para vistas no hace falta.":
+    "Only if you ever measure an action on the site. Not needed for views.",
+  "ID de cliente":
+    "Customer ID",
+  "Los 10 dígitos arriba a la derecha en Google Ads (123-456-7890).":
+    "The 10 digits at the top right in Google Ads (123-456-7890).",
+  "Canal de YouTube":
+    "YouTube channel",
+  "El canal debe estar enlazado a la cuenta de Google Ads antes de anunciar.":
+    "The channel must be linked to the Google Ads account before advertising.",
+  "Perfil de pago":
+    "Payment profile",
+  "Google no deja publicar sin método de pago cargado.":
+    "Google won't publish without a payment method on file.",
+  "ID de anunciante":
+    "Advertiser ID",
+  "En TikTok Ads Manager → Cuenta.":
+    "In TikTok Ads Manager → Account.",
+  "Cuenta con la que se publica":
+    "Account it posts as",
+  "TikTok pide una identidad: el anuncio sale como esa cuenta.":
+    "TikTok requires an identity: the ad runs as that account.",
+  "Cuenta de anunciante":
+    "Advertiser account",
+  "Se crea en ads.x.com con la cuenta del programa.":
+    "Created at ads.x.com with the show's account.",
+  "Método de pago":
+    "Payment method",
+  "X no deja publicar sin tarjeta cargada.":
+    "X won't publish without a card on file.",
+  "Meta Marketing API: falta App Review + verificación del negocio (permiso ads_management).":
+    "Meta Marketing API: App Review and business verification are missing (ads_management permission).",
+  "Meta Marketing API: los anuncios de Instagram se compran por Meta, mismo App Review.":
+    "Meta Marketing API: Instagram ads are bought through Meta — same App Review.",
+  "Google Ads API: falta developer token aprobado (nivel básico) en la cuenta de administrador.":
+    "Google Ads API: an approved developer token (basic access) is missing on the manager account.",
+  "TikTok Ads API: falta aprobación de la app en TikTok for Business. Alternativa sin permisos: usa Promote dentro de la app sobre el video ya publicado.":
+    "TikTok Ads API: app approval in TikTok for Business is missing. No-permission route: use Promote inside the app on the already-published video.",
+  "X Ads: hace falta una cuenta de anunciante en ads.x.com y método de pago. La API pide acceso aparte.":
+    "X Ads: an advertiser account at ads.x.com and a payment method are needed. The API requires separate access.",
+  "Mientras tanto:":
+    "In the meantime:",
+  "dentro de la app de TikTok impulsa un video ya publicado sin necesitar permisos.":
+    "inside the TikTok app boosts an already-published video with no permissions needed.",
 };
 
 /** Development aid: which visible strings have no English yet. */
@@ -298,7 +507,13 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(KEY);
-      if (saved === "en" || saved === "es") setLangState(saved);
+      if (saved === "en" || saved === "es") {
+        setLangState(saved);
+        setDateLocale(saved);
+        // Screen readers and the browser's own translation prompt both read
+        // this; setting it only in the toggle left a restored session lying.
+        document.documentElement.lang = saved;
+      }
     } catch {
       // Private mode or storage disabled — Spanish is a fine default.
     }
@@ -306,6 +521,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
+    setDateLocale(l);
     try {
       localStorage.setItem(KEY, l);
     } catch {}

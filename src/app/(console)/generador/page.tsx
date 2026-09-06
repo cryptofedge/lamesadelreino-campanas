@@ -152,7 +152,7 @@ export default function GeneratorPage() {
           })}
         </div>
         <p className="text-xs mb-4" style={{ color: "var(--faint)" }}>
-          {ANGLES[angle].hint}
+          {t(ANGLES[angle].hint)}
         </p>
 
         <Label>{t("Qué pedimos")}</Label>
@@ -277,7 +277,7 @@ export default function GeneratorPage() {
       </div>
 
       <div className="card p-4">
-        <p className="text-sm font-bold mb-1">¿Quieres algo más suelto?</p>
+        <p className="text-sm font-bold mb-1">{t("¿Quieres algo más suelto?")}</p>
         <p className="text-xs leading-relaxed" style={{ color: "var(--muted)" }}>
           Esto arma la estructura, no inventa. Para que el bot te escriba algo
           desde cero — o te haga la miniatura o el corte — escríbele por WhatsApp

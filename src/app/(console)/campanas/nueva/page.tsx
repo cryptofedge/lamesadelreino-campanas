@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { browserClient } from "@/lib/supabase-browser";
 import { useQuery } from "@/lib/useQuery";
 import { PLATFORMS, GOALS, money, shortDate } from "@/lib/types";
+import { useLang } from "@/lib/i18n";
 import type { Episode, Goal, Platform, PlacementKind } from "@/lib/types";
 
 /** What a normal week looks like, so the form starts already filled in. */
@@ -46,6 +47,7 @@ function suggest(p: Platform, ep: Episode | undefined, goal: Goal): string {
 }
 
 export default function NewCampaignPage() {
+  const { t } = useLang();
   const router = useRouter();
   const { data: episodes } = useQuery<Episode[]>((sb) =>
     sb.from("episodes").select("*").order("publish_at", { ascending: false }),
@@ -78,12 +80,12 @@ export default function NewCampaignPage() {
 
   async function create() {
     if (!ep) {
-      setError("Escoge un episodio.");
+      setError(t("Escoge un episodio."));
       return;
     }
     const chosen = (Object.keys(mix) as Platform[]).filter((p) => mix[p]);
     if (chosen.length === 0) {
-      setError("Escoge al menos una plataforma.");
+      setError(t("Escoge al menos una plataforma."));
       return;
     }
 
@@ -114,7 +116,7 @@ export default function NewCampaignPage() {
 
     const campaignId = (created as { id: string } | null)?.id;
     if (!campaignId) {
-      setError("No se pudo crear la campaña.");
+      setError(t("No se pudo crear la campaña."));
       setBusy(false);
       return;
     }
@@ -137,10 +139,10 @@ export default function NewCampaignPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-black tracking-tight mb-5">Nueva campaña</h1>
+      <h1 className="text-2xl font-black tracking-tight mb-5">{t("Nueva campaña")}</h1>
 
       <div className="card p-4 mb-4">
-        <Label>Episodio</Label>
+        <Label>{t("Episodio")}</Label>
         <select
           value={chosenId}
           onChange={(e) => setEpisodeId(e.target.value)}
@@ -153,13 +155,13 @@ export default function NewCampaignPage() {
         </select>
         {ep?.guest && (
           <p className="text-xs mt-2" style={{ color: "var(--faint)" }}>
-            Invitado: {ep.guest}
+            {t("Invitado")}: {ep.guest}
           </p>
         )}
       </div>
 
       <div className="card p-4 mb-4">
-        <Label>¿Qué buscamos?</Label>
+        <Label>{t("¿Qué buscamos?")}</Label>
         <div className="space-y-2">
           {(Object.keys(GOALS) as Goal[]).map((g) => (
             <button
@@ -172,9 +174,9 @@ export default function NewCampaignPage() {
                 borderColor: goal === g ? "var(--brass)" : "var(--line)",
               }}
             >
-              <div className="font-bold text-sm">{GOALS[g].label}</div>
+              <div className="font-bold text-sm">{t(GOALS[g].label)}</div>
               <div className="text-xs" style={{ color: "var(--faint)" }}>
-                {GOALS[g].hint}
+                {t(GOALS[g].hint)}
               </div>
             </button>
           ))}
@@ -182,7 +184,7 @@ export default function NewCampaignPage() {
       </div>
 
       <div className="card p-4 mb-4">
-        <Label>Presupuesto de anuncios</Label>
+        <Label>{t("Presupuesto de anuncios")}</Label>
         <div className="flex items-center gap-3">
           <input
             type="range"
@@ -200,15 +202,17 @@ export default function NewCampaignPage() {
         </div>
         <p className="text-xs mt-2" style={{ color: "var(--faint)" }}>
           {paidPlatforms.length > 0
-            ? `Se reparte en ${paidPlatforms.length} ${
-                paidPlatforms.length === 1 ? "plataforma" : "plataformas"
-              }: ${money(perPlatform)} cada una.`
-            : "Ninguna plataforma está marcada como pagada todavía."}
+            ? `${t("Se reparte entre")} ${paidPlatforms.length} ${
+                paidPlatforms.length === 1
+                  ? t("plataforma")
+                  : t("plataformas")
+              }.`
+            : t("Ninguna plataforma está marcada como pagada todavía.")}
         </p>
       </div>
 
       <div className="card p-4 mb-5">
-        <Label>Dónde sale</Label>
+        <Label>{t("Dónde sale")}</Label>
         <div className="space-y-2">
           {(Object.keys(PLATFORMS) as Platform[]).map((p) => {
             const pf = PLATFORMS[p];
@@ -241,7 +245,7 @@ export default function NewCampaignPage() {
                         color: on ? "#17130a" : "var(--muted)",
                       }}
                     >
-                      {k === "organic" ? "Post" : k === "paid" ? "Anuncio" : "No"}
+                      {k === "organic" ? t("Post") : k === "paid" ? t("Anuncio") : t("No")}
                     </button>
                   );
                 })}
@@ -263,11 +267,11 @@ export default function NewCampaignPage() {
         className="w-full py-3 rounded-full font-bold disabled:opacity-50"
         style={{ background: "var(--brass)", color: "#17130a" }}
       >
-        {busy ? "Creando…" : "Crear campaña"}
+        {busy ? t("Creando…") : t("Crear campaña")}
       </button>
 
       <p className="text-xs mt-3 text-center" style={{ color: "var(--faint)" }}>
-        Se crea como borrador. Nada sale ni se gasta hasta que la apruebes.
+        {t("Se crea como borrador. Nada sale ni se gasta hasta que la apruebes.")}
       </p>
     </div>
   );

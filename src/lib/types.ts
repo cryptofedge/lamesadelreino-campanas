@@ -207,12 +207,26 @@ function parseDate(iso: string): Date {
   return new Date(iso);
 }
 
-/** "12 de octubre" — the date format the owners actually read. */
+/**
+ * The locale dates are rendered in.
+ *
+ * Module-level rather than a parameter on purpose: shortDate is called from a
+ * dozen render sites, and threading a language through every one of them is how
+ * you end up with three screens that quietly kept saying "12 de septiembre"
+ * while the rest of the console spoke English. The provider sets this once.
+ */
+let dateLocale = "es-DO";
+
+export function setDateLocale(lang: "es" | "en") {
+  dateLocale = lang === "en" ? "en-US" : "es-DO";
+}
+
+/** "12 de octubre" / "October 12" — the date format the owners actually read. */
 export function shortDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = parseDate(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("es-DO", { day: "numeric", month: "long" });
+  return d.toLocaleDateString(dateLocale, { day: "numeric", month: "long" });
 }
 
 export function daysUntil(iso: string | null | undefined): number | null {

@@ -25,10 +25,12 @@ import {
   shortDate,
 } from "@/lib/types";
 import type { Campaign, Episode, Placement } from "@/lib/types";
+import { useLang } from "@/lib/i18n";
 
 type Row = Campaign & { placements: Placement[]; approved_by_name?: string | null };
 
 export default function CampaignDetail() {
+  const { t } = useLang();
   const id = useSearchParams().get("id") ?? "";
   const [open, setOpen] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -59,16 +61,16 @@ export default function CampaignDetail() {
   if (loading) {
     return (
       <p className="text-sm" style={{ color: "var(--faint)" }}>
-        Cargando…
+        {t("Cargando…")}
       </p>
     );
   }
   if (!campaign) {
     return (
       <div className="card p-8 text-center">
-        <p className="font-bold mb-2">No encontramos esa campaña</p>
+        <p className="font-bold mb-2">{t("No encontramos esa campaña")}</p>
         <Link href="/campanas" style={{ color: "var(--brass)" }}>
-          Volver a campañas
+          {t("Volver a campañas")}
         </Link>
       </div>
     );
@@ -115,19 +117,19 @@ export default function CampaignDetail() {
         className="text-sm inline-block mb-4"
         style={{ color: "var(--faint)" }}
       >
-        ← Campañas
+        ← {t("Campañas")}
       </Link>
 
       <div className="flex items-start gap-3 mb-5 flex-wrap">
         <div className="mr-auto min-w-0">
           <span className="chip mb-2" style={{ color: st.color }}>
-            {st.label}
+            {t(st.label)}
           </span>
           <h1 className="text-2xl font-black tracking-tight leading-tight">
             {campaign.name}
           </h1>
           <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
-            {GOALS[campaign.goal].label} · {shortDate(campaign.starts_at)} →{" "}
+            {t(GOALS[campaign.goal].label)} · {shortDate(campaign.starts_at)} →{" "}
             {shortDate(campaign.ends_at)}
             {episode ? ` · Ep. ${episode.number}` : ""}
           </p>
@@ -140,19 +142,19 @@ export default function CampaignDetail() {
             className="px-4 py-2 rounded-full font-bold text-sm disabled:opacity-50"
             style={{ background: "var(--brass)", color: "#17130a" }}
           >
-            Aprobar campaña
+            {t("Aprobar campaña")}
           </button>
         )}
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <Stat label="Alcance" value={count(reach)} />
-        <Stat label="Clics" value={count(clicks)} />
-        <Stat label="Publicaciones" value={String(placements.length)} />
+        <Stat label={t("Alcance")} value={count(reach)} />
+        <Stat label={t("Clics")} value={count(clicks)} />
+        <Stat label={t("Publicaciones")} value={String(placements.length)} />
       </div>
 
       <h2 className="text-sm font-bold uppercase tracking-wider mb-3" style={{ color: "var(--faint)" }}>
-        Publicaciones y anuncios
+        {t("Publicaciones y anuncios")}
       </h2>
 
       <div className="space-y-3">
@@ -179,10 +181,10 @@ export default function CampaignDetail() {
                     borderColor: "var(--line)",
                   }}
                 >
-                  {paid ? "Pagado" : "Orgánico"}
+                  {paid ? t("Pagado") : t("Orgánico")}
                 </span>
                 <span className="chip" style={{ color: ps.color }}>
-                  {ps.label}
+                  {t(ps.label)}
                 </span>
                 <span className="ml-auto text-sm nums" style={{ color: "var(--muted)" }}>
                   {shortDate(p.run_at)}
@@ -212,23 +214,21 @@ export default function CampaignDetail() {
                       color: "var(--faint)",
                     }}
                   >
-                    sin
-                    <br />
-                    imagen
+                    {t("sin imagen")}
                   </div>
                 )}
 
                 <p className="text-sm" style={{ color: "var(--text)" }}>
                   {p.copy || (
-                    <span style={{ color: "var(--faint)" }}>Sin texto todavía</span>
+                    <span style={{ color: "var(--faint)" }}>{t("Sin texto todavía")}</span>
                   )}
                 </p>
               </div>
 
               {(p.reach !== null || p.clicks !== null) && (
                 <div className="flex gap-4 text-xs mb-3 nums" style={{ color: "var(--muted)" }}>
-                  <span>Alcance {count(p.reach)}</span>
-                  <span>Clics {count(p.clicks)}</span>
+                  <span>{t("Alcance")} {count(p.reach)}</span>
+                  <span>{t("Clics")} {count(p.clicks)}</span>
                 </div>
               )}
 
@@ -240,7 +240,7 @@ export default function CampaignDetail() {
                   className="text-sm px-3 py-1.5 rounded-full font-semibold disabled:opacity-50"
                   style={{ background: "var(--surface-3)", color: "var(--text)" }}
                 >
-                  Poner en cola
+                  {t("Poner en cola")}
                 </button>
               )}
 
@@ -251,7 +251,7 @@ export default function CampaignDetail() {
                     className="text-sm px-3 py-1.5 rounded-full font-semibold"
                     style={{ background: "var(--surface-3)", color: "var(--text)" }}
                   >
-                    {isOpen ? "Ocultar" : "Preparar anuncio"}
+                    {isOpen ? t("Ocultar") : t("Preparar anuncio")}
                   </button>
 
                   {isOpen && h && (
@@ -264,9 +264,9 @@ export default function CampaignDetail() {
                           className="text-xs mb-3 leading-relaxed"
                           style={{ color: "var(--amber)" }}
                         >
-                          <strong>Todavía no se puede lanzar solo.</strong>{" "}
-                          {adapter.blocker} Mientras tanto, aquí está todo listo
-                          para pegarlo en un minuto.
+                          <strong>{t("Todavía no se puede lanzar solo.")}</strong>{" "}
+                          {t(adapter.blocker ?? "")}{" "}
+                          {t("Mientras tanto, aquí está todo listo para pegarlo en un minuto.")}
                         </p>
                       )}
 
@@ -283,7 +283,7 @@ export default function CampaignDetail() {
                           className="text-xs px-3 py-1.5 rounded-full font-semibold"
                           style={{ background: "var(--surface-3)", color: "var(--text)" }}
                         >
-                          Copiar
+                          {t("Copiar")}
                         </button>
                         <a
                           href={h.url}
@@ -292,7 +292,7 @@ export default function CampaignDetail() {
                           className="text-xs px-3 py-1.5 rounded-full font-semibold"
                           style={{ background: "var(--brass)", color: "#17130a" }}
                         >
-                          Abrir {pf.label} Ads ↗
+                          {t("Abrir")} {pf.label} Ads ↗
                         </a>
                       </div>
                     </div>

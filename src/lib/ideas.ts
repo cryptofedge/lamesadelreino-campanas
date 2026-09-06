@@ -191,6 +191,194 @@ const THEMES: Theme[] = [
   },
 ];
 
+
+/* ------------------------------------------------------------------ */
+/* English.
+
+   Written, not translated. These are questions meant to be asked out loud on
+   a bilingual show, and a dictionary pass produces sentences that are correct
+   and unaskable. Keyed by theme id so a missing one falls back to Spanish
+   rather than showing nothing.                                        */
+/* ------------------------------------------------------------------ */
+
+interface ThemeEn {
+  label: string;
+  titles: string[];
+  questions: string[];
+  guest: string;
+}
+
+const THEMES_EN: Record<string, ThemeEn> = {
+  trabajo: {
+    label: "Faith and work",
+    titles: [
+      "When work becomes the altar",
+      "Praying about a job you hate",
+      "Can you stay honest and still compete?",
+    ],
+    questions: [
+      "When did work stop being a means and turn into who you are?",
+      "What would you say to someone three years into something they can't stand?",
+      "What does honesty look like when it costs you money?",
+    ],
+    guest: "Someone who left a good job on conviction, or stayed and changed it from inside.",
+  },
+  familia: {
+    label: "Family",
+    titles: [
+      "The faith that isn't inherited",
+      "When your kids ask and you don't know",
+      "Honouring a father who wasn't there",
+    ],
+    questions: [
+      "What do you do when your child stops believing what you believe?",
+      "Can you honour someone who caused harm?",
+      "What did you learn from your parents that you don't want to repeat?",
+    ],
+    guest: "A parent with grown children who took a different road.",
+  },
+  dinero: {
+    label: "Money",
+    titles: [
+      "Debt and faith",
+      "Tithing when it doesn't stretch",
+      "Blessing or business?",
+    ],
+    questions: [
+      "What do you say to someone giving what they don't have?",
+      "How do you talk about money in church without it sounding like a sale?",
+      "What changed in your life when your relationship with money changed?",
+    ],
+    guest: "Someone who climbed out of serious debt, or who advises families on their finances.",
+  },
+  ansiedad: {
+    label: "Anxiety and mental health",
+    titles: [
+      "Praying with anxiety",
+      "Faith or therapy?",
+      "The Sunday you couldn't get up",
+    ],
+    questions: [
+      "Why is it so hard to say 'I'm not okay' in church?",
+      "What happens when praying doesn't take away what you feel?",
+      "Is seeing a therapist a lack of faith? Where did that idea come from?",
+    ],
+    guest: "A mental health professional who is also a believer.",
+  },
+  duda: {
+    label: "Doubts",
+    titles: [
+      "The ones who left the church",
+      "Asking without getting looked at",
+      "Believing with questions on top",
+    ],
+    questions: [
+      "What question were you afraid to ask out loud?",
+      "Why do people really leave?",
+      "What's the difference between doubting and not believing?",
+    ],
+    guest: "Someone who walked away and came back, and can tell both halves.",
+  },
+  comunidad: {
+    label: "Community",
+    titles: [
+      "Walking into church knowing nobody",
+      "The people who held you up",
+      "What is a table for?",
+    ],
+    questions: [
+      "Who showed up when nobody else did?",
+      "Why is it so hard to ask for help?",
+      "What turns a group into family?",
+    ],
+    guest: "Whoever leads a small group or a welcome ministry.",
+  },
+  proposito: {
+    label: "Purpose",
+    titles: [
+      "A push, or the Spirit?",
+      "When the door closes",
+      "The calling that never came",
+    ],
+    questions: [
+      "How do you tell your own wanting from a calling?",
+      "What do you do with a dream that didn't happen?",
+      "What if yours was the ordinary one?",
+    ],
+    guest: "Someone who chased something for years and had to let it go.",
+  },
+  perdon: {
+    label: "Forgiveness",
+    titles: [
+      "Forgiving without reconciling",
+      "What doesn't get forgotten",
+      "Apologising late",
+    ],
+    questions: [
+      "Does forgiving mean you have to go back?",
+      "What do you do when the other person never apologises?",
+      "How long is too late?",
+    ],
+    guest: "Two people who reconciled after years, if they're willing to tell it.",
+  },
+  jovenes: {
+    label: "Young people",
+    titles: [
+      "Growing up in church",
+      "Your parents' faith — is it yours?",
+      "What nobody explained to you at 20",
+    ],
+    questions: [
+      "What were you told young that you now know wasn't true?",
+      "How do you make a faith your own when it was handed to you finished?",
+      "What would you say to an 18-year-old today?",
+    ],
+    guest: "A youth leader, or someone just out of that season.",
+  },
+  servicio: {
+    label: "Serving",
+    titles: [
+      "Tired of serving",
+      "The one who always says yes",
+      "Serving where nobody sees",
+    ],
+    questions: [
+      "When did serving stop bringing you joy?",
+      "Can you say no in church?",
+      "What do you do with the tiredness of always being there?",
+    ],
+    guest: "Someone who burned out serving and had to stop.",
+  },
+};
+
+const CUSTOM_TITLES_EN = [
+  "Let's talk about {t}",
+  "What nobody tells you about {t}",
+  "When {t} stops being easy",
+  "What if {t} isn't what you thought?",
+  "{t}: what we learned late",
+  "The truth about {t}",
+];
+
+const CUSTOM_QUESTIONS_EN = [
+  "What has been the hardest part of {t} for you?",
+  "What were you told about {t} that turned out not to be true?",
+  "When did {t} change for you?",
+  "What would you say to someone just starting out with {t}?",
+  "What part of {t} doesn't get talked about in church?",
+  "How do you know when {t} has become a problem?",
+  "What do you wish someone had explained to you about {t}?",
+  "What gets lost when we don't talk about {t}?",
+  "When was the last time {t} made you doubt?",
+];
+
+const CUSTOM_GUESTS_EN = [
+  "Someone who has lived {t} up close and can tell it plainly.",
+  "A person whose mind changed about {t} over the years.",
+  "Someone who works with people going through {t}.",
+  "Two people who see {t} differently, at the same table.",
+];
+
 export interface Idea {
   id: string;
   theme: string;
@@ -264,7 +452,12 @@ export function customIdeas(
   seed: number,
   count = 6,
   formatLabel?: string,
+  lang: "es" | "en" = "es",
 ): Idea[] {
+  const en = lang === "en";
+  const TITLES = en ? CUSTOM_TITLES_EN : CUSTOM_TITLES;
+  const QUESTIONS = en ? CUSTOM_QUESTIONS_EN : CUSTOM_QUESTIONS;
+  const GUESTS = en ? CUSTOM_GUESTS_EN : CUSTOM_GUESTS;
   const shown = topic.trim();
   const t = inSentence(shown);
   const formats = Object.keys(FORMATS) as Format[];
@@ -277,7 +470,7 @@ export function customIdeas(
     // Three different questions per idea, walking the list rather than
     // repeating the same opener six times.
     const questions = [0, 1, 2].map((k) =>
-      CUSTOM_QUESTIONS[(n * 3 + k) % CUSTOM_QUESTIONS.length].replaceAll("{t}", t),
+      QUESTIONS[(n * 3 + k) % QUESTIONS.length].replaceAll("{t}", t),
     );
 
     out.push({
@@ -285,12 +478,12 @@ export function customIdeas(
       theme: shown,
       themeId: "custom",
       format: label,
-      title: pick(CUSTOM_TITLES, n)
+      title: pick(TITLES, n)
         .replaceAll("{t}", t)
         // A title that starts with the topic should keep its capital.
         .replace(/^(.)/, (c) => c.toUpperCase()),
       questions,
-      guest: pick(CUSTOM_GUESTS, n).replaceAll("{t}", t),
+      guest: pick(GUESTS, n).replaceAll("{t}", t),
       custom: true,
     });
   }
@@ -309,18 +502,23 @@ export function generateIdeas(
   count = 6,
   format?: Format,
   themeId?: string,
+  lang: "es" | "en" = "es",
 ): Idea[] {
   const pool = themeId ? THEMES.filter((t) => t.id === themeId) : THEMES;
+  const en = lang === "en";
   const formats = Object.keys(FORMATS) as Format[];
   const out: Idea[] = [];
 
   for (let i = 0; i < count; i++) {
-    const t = pool[(seed + i) % pool.length];
+    const base = pool[(seed + i) % pool.length];
+    // Fall back to Spanish when a theme has no English yet, rather than
+    // rendering an empty card.
+    const t = (en && THEMES_EN[base.id] ? { ...base, ...THEMES_EN[base.id] } : base) as typeof base;
     const f = format ?? pick(formats, seed + i * 3);
     out.push({
-      id: `${t.id}-${f}-${seed + i}`,
+      id: `${base.id}-${f}-${seed + i}`,
       theme: t.label,
-      themeId: t.id,
+      themeId: base.id,
       format: f,
       title: pick(t.titles, seed + i),
       // Rotate which question leads, so the same theme reads differently.

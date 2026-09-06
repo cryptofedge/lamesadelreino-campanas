@@ -174,7 +174,7 @@ export default function MediaStudio({
                     color: on ? "var(--brass)" : "var(--muted)",
                     border: `1px solid ${on ? "var(--line-warm)" : "var(--line)"}`,
                   }}
-                  title={MEDIA_KINDS[k].hint}
+                  title={t(MEDIA_KINDS[k].hint)}
                 >
                   {t(MEDIA_KINDS[k].label)}
                 </button>
@@ -185,13 +185,13 @@ export default function MediaStudio({
           <textarea
             value={idea}
             rows={3}
-            placeholder="¿Qué quieres ver? Ej: una mesa vacía con dos tazas y luz de ventana"
+            placeholder={t("¿Qué quieres ver? Ej: una mesa vacía con dos tazas y luz de ventana")}
             onChange={(e) => setIdea(e.target.value)}
             style={{ resize: "vertical", lineHeight: 1.5 }}
           />
 
           <p className="text-xs mt-2 mb-3" style={{ color: "var(--faint)" }}>
-            {MEDIA_KINDS[kind].hint} {prompt.aspect} · {prompt.costHint}
+            {t(MEDIA_KINDS[kind].hint)} {prompt.aspect} · {t(prompt.costHint)}
           </p>
 
           <details className="mb-3">
@@ -241,8 +241,7 @@ export default function MediaStudio({
             className="text-xs mt-3 leading-relaxed"
             style={{ color: "var(--muted)" }}
           >
-            El bot la genera y te la manda por WhatsApp. Aquí no se puede generar
-            directamente: esta página es pública y la clave quedaría a la vista.
+            {t("El bot la genera y te la manda por WhatsApp. Aquí no se puede generar directamente: esta página es pública y la clave quedaría a la vista.")}
           </p>
         </>
       ) : (
@@ -309,8 +308,7 @@ export default function MediaStudio({
 
               {isVideo && (
                 <p className="text-xs mt-2" style={{ color: "var(--faint)" }}>
-                  Los videos no se recortan aquí. Para cortar o subtitular,
-                  pídeselo al bot con #elmini.
+                  {t("Los videos no se recortan aquí. Para cortar o subtitular, pídeselo al bot con #elmini.")}
                 </p>
               )}
             </div>

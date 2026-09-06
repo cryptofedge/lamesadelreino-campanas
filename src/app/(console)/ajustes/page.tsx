@@ -108,7 +108,7 @@ export default function SettingsPage() {
           >
             {DAYS.map((d) => (
               <option key={d} value={d}>
-                {d}
+                {t(d)}
               </option>
             ))}
           </select>
@@ -212,7 +212,7 @@ export default function SettingsPage() {
         >
           {["Todos", "Mujeres", "Hombres"].map((g) => (
             <option key={g} value={g}>
-              {g}
+              {t(g)}
             </option>
           ))}
         </select>
@@ -224,7 +224,7 @@ export default function SettingsPage() {
         >
           {SPECIAL_CATEGORIES.map((c) => (
             <option key={c} value={c}>
-              {c}
+              {t(c)}
             </option>
           ))}
         </select>
@@ -235,11 +235,11 @@ export default function SettingsPage() {
 
       {/* ---------------- Accounts ---------------- */}
       {(Object.keys(ACCOUNT_FIELDS) as (keyof typeof ACCOUNT_FIELDS)[]).map((p) => (
-        <Card key={p} title={ACCOUNT_FIELDS[p].label}>
+        <Card key={p} title={t(ACCOUNT_FIELDS[p].label)}>
           {ACCOUNT_FIELDS[p].fields.map((f) => (
             <div key={f.key} className="mb-4 last:mb-0">
               <Label>
-                {f.label}
+                {t(f.label)}
                 {f.required && (
                   <span style={{ color: "var(--amber)" }}> · {t("obligatorio")}</span>
                 )}
@@ -248,7 +248,7 @@ export default function SettingsPage() {
                 value={v[f.key] ?? ""}
                 onChange={(e) => set(f.key, e.target.value)}
               />
-              <Hint>{f.hint}</Hint>
+              <Hint>{t(f.hint)}</Hint>
             </div>
           ))}
         </Card>

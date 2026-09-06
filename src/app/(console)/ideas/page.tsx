@@ -19,7 +19,7 @@ import type { Episode } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
 
 export default function IdeasPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const router = useRouter();
   const [seed, setSeed] = useState(0);
   // A visible dropdown *and* a free-text box, side by side.
@@ -58,8 +58,8 @@ export default function IdeasPage() {
 
   const ideas =
     topic.trim() && !matched
-      ? customIdeas(topic, seed, 6, format || undefined)
-      : generateIdeas(seed, 6, matchedFormat, matched?.id).map((i) => ({
+      ? customIdeas(topic, seed, 6, format || undefined, lang)
+      : generateIdeas(seed, 6, matchedFormat, matched?.id, lang).map((i) => ({
           ...i,
           format: matchedFormat ? FORMATS[matchedFormat].label : i.format,
         }));
@@ -143,7 +143,7 @@ export default function IdeasPage() {
               <option value="">{t("Cualquier tema")}</option>
               {THEME_LIST.map((x) => (
                 <option key={x.id} value={x.id}>
-                  {x.label}
+                  {t(x.label)}
                 </option>
               ))}
             </select>
@@ -166,7 +166,7 @@ export default function IdeasPage() {
               <option value="">{t("Cualquier formato")}</option>
               {(Object.keys(FORMATS) as Format[]).map((f) => (
                 <option key={f} value={f}>
-                  {FORMATS[f].label}
+                  {t(FORMATS[f].label)}
                 </option>
               ))}
             </select>
@@ -205,7 +205,7 @@ export default function IdeasPage() {
           <div key={idea.id} className="card p-4">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="chip" style={{ color: "var(--violet)" }}>
-                {idea.theme}
+                {t(idea.theme)}
               </span>
               <span className="chip" style={{ color: "var(--muted)" }}>
                 {t(idea.format)}

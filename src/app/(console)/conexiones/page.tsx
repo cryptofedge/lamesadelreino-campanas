@@ -128,7 +128,7 @@ function Section({
                   className="text-xs mt-2 leading-relaxed"
                   style={{ color: "var(--muted)" }}
                 >
-                  {reason}
+                  {t(reason)}
                 </p>
               )}
 
@@ -137,8 +137,8 @@ function Section({
                   blocked as the others. */}
               {!connected && kind === "paid" && platform === "tiktok" && (
                 <p className="text-xs mt-2" style={{ color: "var(--green)" }}>
-                  Mientras tanto: <strong>Promote</strong> dentro de la app de
-                  TikTok impulsa un video ya publicado sin necesitar permisos.
+                  {t("Mientras tanto:")} <strong>Promote</strong>{" "}
+                  {t("dentro de la app de TikTok impulsa un video ya publicado sin necesitar permisos.")}
                 </p>
               )}
             </div>

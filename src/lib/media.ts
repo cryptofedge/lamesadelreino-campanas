@@ -51,7 +51,8 @@ export interface MediaPrompt {
   video: boolean;
   /** Ready to paste, or to send to the bot. */
   text: string;
-  /** Roughly what one generation costs, so nobody is surprised by the bill. */
+  /** How heavy this one is to make. Deliberately not a price — no screen in
+   *  this console quotes money. */
   costHint: string;
 }
 
@@ -90,8 +91,8 @@ export function buildPrompt(
     video: k.video,
     text: lines.join("\n"),
     costHint: k.video
-      ? "Video: cuesta bastante más que una imagen — confirma con Richard antes."
-      : "Imagen: unos $0.13 cada una.",
+      ? "El video toma bastante más que una imagen — confírmalo con Richard antes."
+      : "Listo en segundos.",
   };
 }
 

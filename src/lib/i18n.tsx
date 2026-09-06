@@ -254,6 +254,17 @@ const EN: Record<string, string> = {
   "Lo que más gente ve": "Widest reach",
   "Por plataforma": "By platform",
   "Por campaña": "By campaign",
+  "Igual que se ve en Meta, Google Ads y TikTok — para que sea el mismo idioma cuando abras los de verdad.":
+    "Laid out like Meta, Google Ads and TikTok — so it's the same language when you open the real ones.",
+  "Nombre": "Name",
+  "Piezas": "Pieces",
+  "Plataformas": "Platforms",
+  "al aire": "running",
+  "Resultados de": "Results from",
+  "Todavía no hay suficientes días para la gráfica.":
+    "Not enough days yet for the graph.",
+  "CTR es cuánta de la gente que lo vio hizo clic. Toca cualquier columna para ordenar.":
+    "CTR is how many of the people who saw it clicked. Tap any column to sort.",
   "Alcance por plataforma": "Reach by platform",
   "Respuesta por plataforma": "Response by platform",
   "Alcance por campaña": "Reach by campaign",

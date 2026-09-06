@@ -254,6 +254,14 @@ const EN: Record<string, string> = {
   "Lo que más gente ve": "Widest reach",
   "Por plataforma": "By platform",
   "Por campaña": "By campaign",
+  "Alcance por plataforma": "Reach by platform",
+  "Respuesta por plataforma": "Response by platform",
+  "Alcance por campaña": "Reach by campaign",
+  "Ver como tabla": "View as table",
+  "Campaña": "Campaign",
+  "de alcance": "reach",
+  "Cuánta de la gente que lo vio hizo clic. Es la señal de si el mensaje pegó.":
+    "How many of the people who saw it clicked. That's the signal for whether the message landed.",
   "clics": "clicks",
   "alcance": "reach",
 

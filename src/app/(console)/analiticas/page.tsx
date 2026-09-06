@@ -4,30 +4,25 @@
  * How the campaigns actually performed.
  *
  * Deliberately no money anywhere on this page — not spend, not budget, not cost
- * per anything. It reports reach, clicks and engagement rate, which is what
- * tells you whether an episode landed. What it cost to get there is a separate
- * conversation and not one this screen has.
+ * per anything. It reports reach, clicks and response rate, which is what tells
+ * you whether an episode landed.
  *
- * Engagement rate is shown per platform rather than only as a total, because a
- * single blended number hides the thing worth knowing: the same clip usually
- * performs very differently on TikTok than on Facebook, and that is what
- * decides where next week goes.
+ * Reach and response rate get separate charts rather than one chart with two
+ * y-axes: they are different scales, and a dual axis lets the reader believe
+ * two lines crossing means something.
  */
 import Link from "next/link";
 import { useQuery } from "@/lib/useQuery";
 import { useLang } from "@/lib/i18n";
-import {
-  PLATFORMS,
-  CAMPAIGN_STATUS,
-  count,
-  shortDate,
-} from "@/lib/types";
+import { BarChart, ColumnChart, TableView } from "@/components/Charts";
+import type { Row as ChartRow } from "@/components/Charts";
+import { PLATFORMS, CAMPAIGN_STATUS, count, shortDate } from "@/lib/types";
 import type { Campaign, Placement, Platform } from "@/lib/types";
 
 type Row = Campaign & { placements: Placement[] };
 
-/** Clicks over reach. Null when nothing has been reported yet — a campaign that
- *  has not run is not a campaign that performed at 0%. */
+/** Clicks over reach. Null when nothing has been reported — a campaign that has
+ *  not run is not a campaign that performed at 0%. */
 function rate(reach: number, clicks: number): number | null {
   if (!reach) return null;
   return (clicks / reach) * 100;
@@ -39,7 +34,7 @@ export default function AnalyticsPage() {
   const { t } = useLang();
 
   const { data: campaigns, loading } = useQuery<Row[]>((sb) =>
-    sb.from("campaigns").select("*").order("starts_at", { ascending: false }),
+    sb.from("campaigns").select("*").order("starts_at", { ascending: true }),
   );
 
   const all = campaigns ?? [];
@@ -49,7 +44,6 @@ export default function AnalyticsPage() {
   const reach = placements.reduce((s, p) => s + (p.reach ?? 0), 0);
   const clicks = placements.reduce((s, p) => s + (p.clicks ?? 0), 0);
 
-  // Per platform, so the comparison that matters is on screen.
   const byPlatform = (Object.keys(PLATFORMS) as Platform[])
     .map((pl) => {
       const rows = placements.filter((p) => p.platform === pl);
@@ -57,14 +51,46 @@ export default function AnalyticsPage() {
       const c = rows.reduce((s, p) => s + (p.clicks ?? 0), 0);
       return { platform: pl, posts: rows.length, reach: r, clicks: c, rate: rate(r, c) };
     })
-    .filter((x) => x.posts > 0)
+    .filter((x) => x.reach > 0)
     .sort((a, b) => b.reach - a.reach);
 
-  const best = byPlatform.filter((x) => x.rate !== null).sort((a, b) => b.rate! - a.rate!)[0];
+  const best = [...byPlatform].filter((x) => x.rate !== null).sort((a, b) => b.rate! - a.rate!)[0];
   const widest = byPlatform[0];
 
+  // Chronological, so the columns read as time rather than as a ranking.
+  const overTime: ChartRow[] = all
+    .map((c) => {
+      const r = (c.placements ?? []).reduce((s, p) => s + (p.reach ?? 0), 0);
+      return {
+        key: c.id,
+        label: c.name.split("—")[0].trim(),
+        value: r,
+        note: `${c.name} · ${shortDate(c.starts_at)}`,
+      };
+    })
+    .filter((r) => r.value > 0);
+
+  const reachRows: ChartRow[] = byPlatform.map((x) => ({
+    key: x.platform,
+    label: PLATFORMS[x.platform].label,
+    dot: PLATFORMS[x.platform].color,
+    value: x.reach,
+    note: `${count(x.clicks)} ${t("clics")} · ${pct(x.rate)}`,
+  }));
+
+  const rateRows: ChartRow[] = [...byPlatform]
+    .filter((x) => x.rate !== null)
+    .sort((a, b) => b.rate! - a.rate!)
+    .map((x) => ({
+      key: x.platform,
+      label: PLATFORMS[x.platform].label,
+      dot: PLATFORMS[x.platform].color,
+      value: x.rate!,
+      note: `${count(x.reach)} ${t("de alcance")}`,
+    }));
+
   return (
-    <div>
+    <div className="max-w-3xl">
       <h1 className="text-2xl font-black tracking-tight mb-1">{t("Analíticas")}</h1>
       <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
         {t("Cómo le fue a cada campaña. Alcance, clics y qué tan bien respondió la gente.")}
@@ -87,23 +113,20 @@ export default function AnalyticsPage() {
 
       {reported.length > 0 && (
         <>
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-4">
             <Stat label={t("Alcance total")} value={count(reach)} />
             <Stat label={t("Clics")} value={count(clicks)} />
             <Stat label={t("Respuesta")} value={pct(rate(reach, clicks))} />
           </div>
 
-          {/* One plain-language sentence, because a table of numbers does not
-              tell anybody what to do differently next week. */}
           {best && widest && (
-            <div className="card p-4 mb-6">
+            <div className="card p-4 mb-5">
               <p className="text-sm leading-relaxed">
                 {t("Lo que más responde")}:{" "}
                 <strong style={{ color: "var(--brass)" }}>
                   {PLATFORMS[best.platform].label}
                 </strong>{" "}
-                ({pct(best.rate)}).{" "}
-                {t("Lo que más gente ve")}:{" "}
+                ({pct(best.rate)}). {t("Lo que más gente ve")}:{" "}
                 <strong style={{ color: "var(--brass)" }}>
                   {PLATFORMS[widest.platform].label}
                 </strong>{" "}
@@ -112,44 +135,44 @@ export default function AnalyticsPage() {
             </div>
           )}
 
-          <h2
-            className="text-sm font-bold uppercase tracking-wider mb-3"
-            style={{ color: "var(--faint)" }}
-          >
-            {t("Por plataforma")}
-          </h2>
+          <Panel title={t("Alcance por plataforma")}>
+            <BarChart rows={reachRows} emptyLabel={t("Todavía no hay resultados")} />
+            <TableView
+              label={t("Ver como tabla")}
+              headers={[t("Plataforma"), t("Alcance"), t("Clics"), t("Respuesta")]}
+              rows={byPlatform.map((x) => [
+                PLATFORMS[x.platform].label,
+                count(x.reach),
+                count(x.clicks),
+                pct(x.rate),
+              ])}
+            />
+          </Panel>
 
-          <div className="space-y-2 mb-7">
-            {byPlatform.map((x) => {
-              const pf = PLATFORMS[x.platform];
-              // Bars are relative to the widest reach, so the comparison is
-              // visual rather than arithmetic.
-              const w = widest.reach ? (x.reach / widest.reach) * 100 : 0;
-              return (
-                <div key={x.platform} className="card p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className="inline-block w-2 h-2 rounded-full shrink-0"
-                      style={{ background: pf.color }}
-                    />
-                    <span className="font-bold text-sm mr-auto">{pf.label}</span>
-                    <span className="text-xs nums" style={{ color: "var(--muted)" }}>
-                      {count(x.reach)} · {count(x.clicks)} {t("clics")} · {pct(x.rate)}
-                    </span>
-                  </div>
-                  <div
-                    className="h-1.5 rounded-full overflow-hidden"
-                    style={{ background: "var(--surface-3)" }}
-                  >
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${w}%`, background: pf.color }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <Panel title={t("Respuesta por plataforma")}>
+            <BarChart
+              rows={rateRows}
+              format={(n) => `${n.toFixed(1)}%`}
+              emptyLabel={t("Todavía no hay resultados")}
+            />
+            <p className="text-xs mt-2" style={{ color: "var(--faint)" }}>
+              {t("Cuánta de la gente que lo vio hizo clic. Es la señal de si el mensaje pegó.")}
+            </p>
+          </Panel>
+
+          <Panel title={t("Alcance por campaña")}>
+            <ColumnChart rows={overTime} emptyLabel={t("Todavía no hay resultados")} />
+            <TableView
+              label={t("Ver como tabla")}
+              headers={[t("Campaña"), t("Alcance"), t("Clics"), t("Respuesta")]}
+              rows={all.map((c) => {
+                const rows = c.placements ?? [];
+                const r = rows.reduce((s, p) => s + (p.reach ?? 0), 0);
+                const k = rows.reduce((s, p) => s + (p.clicks ?? 0), 0);
+                return [c.name, count(r), count(k), pct(rate(r, k))];
+              })}
+            />
+          </Panel>
 
           <h2
             className="text-sm font-bold uppercase tracking-wider mb-3"
@@ -159,7 +182,7 @@ export default function AnalyticsPage() {
           </h2>
 
           <div className="space-y-2">
-            {all.map((c) => {
+            {[...all].reverse().map((c) => {
               const rows = c.placements ?? [];
               const r = rows.reduce((s, p) => s + (p.reach ?? 0), 0);
               const k = rows.reduce((s, p) => s + (p.clicks ?? 0), 0);
@@ -190,6 +213,20 @@ export default function AnalyticsPage() {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="card p-4 mb-4">
+      <h2
+        className="text-xs font-bold uppercase tracking-wider mb-3"
+        style={{ color: "var(--faint)" }}
+      >
+        {title}
+      </h2>
+      {children}
     </div>
   );
 }

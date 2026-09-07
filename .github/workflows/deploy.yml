@@ -24,7 +24,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  DEMO: "1"
+  # Flipped to "0" once the Supabase project existed: the console now reads and
+  # writes real data instead of fixtures.
+  DEMO: "0"
 
 jobs:
   build:

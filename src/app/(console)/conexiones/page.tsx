@@ -17,10 +17,11 @@ import { PLATFORMS, expectedConnections } from "@/lib/types";
 import { ADAPTERS } from "@/lib/launch";
 import type { Connection, Platform, PlacementKind } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
+import ConnectFlow from "@/components/ConnectFlow";
 
 export default function ConnectionsPage() {
   const { t, lang } = useLang();
-  const { data: rows, loading } = useQuery<Connection[]>((sb) =>
+  const { data: rows, loading, reload } = useQuery<Connection[]>((sb) =>
     sb.from("connections").select("*"),
   );
 
@@ -46,12 +47,14 @@ export default function ConnectionsPage() {
       )}
 
       <Section
+        onSaved={reload}
         title={t("Publicaciones")}
         hint={t("Posts, reels y cortes. Se programan desde aquí.")}
         items={merged.filter((m) => m.kind === "organic")}
       />
 
       <Section
+        onSaved={reload}
         title={t("Anuncios pagados")}
         hint={t("Para gastar dinero desde aquí hace falta permiso de cada plataforma. Se pide una vez y tarda días.")}
         items={merged.filter((m) => m.kind === "paid")}
@@ -64,10 +67,12 @@ function Section({
   title,
   hint,
   items,
+  onSaved,
 }: {
   title: string;
   hint: string;
   items: { platform: Platform; kind: PlacementKind; row: Connection | null }[];
+  onSaved?: () => void;
 }) {
   const { t } = useLang();
   if (items.length === 0) return null;
@@ -131,6 +136,13 @@ function Section({
                   {t(reason)}
                 </p>
               )}
+
+              <ConnectFlow
+                platform={platform}
+                kind={kind}
+                connected={connected}
+                onSaved={onSaved}
+              />
 
               {/* TikTok is the one platform with a route that needs no API
                   approval at all, so say so rather than leaving it looking as

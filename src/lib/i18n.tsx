@@ -195,6 +195,52 @@ const EN: Record<string, string> = {
     "Spending money from here needs each platform's permission. You apply once and it takes days.",
   "Todavía no se ha conectado esta cuenta.":
     "This account hasn't been connected yet.",
+  "Conectar": "Connect",
+  "Ya está listo": "It's done",
+  "Se abre en tu navegador, donde ya estás con la sesión iniciada. Sigue los pasos y vuelve aquí.":
+    "It opens in your browser, where you're already signed in. Follow the steps and come back here.",
+  "Esto guarda la cuenta, pero gastar desde aquí sigue esperando el permiso de la plataforma.":
+    "This saves the account, but spending from here still waits on the platform's permission.",
+  "Escoge la página de La Mesa del Reino.": "Pick the La Mesa del Reino page.",
+  "Confirma que tu cuenta aparece como administrador.":
+    "Check that your account is listed as an admin.",
+  "Copia el nombre exacto de la página.": "Copy the page's exact name.",
+  "Toca “Agregar” si la cuenta no aparece.": "Tap “Add” if the account isn't listed.",
+  "Entra con la cuenta del programa y confirma.":
+    "Sign in with the show's account and confirm.",
+  "Debe quedar conectada a la página de Facebook.":
+    "It has to end up connected to the Facebook page.",
+  "Arriba a la derecha, confirma que estás en el canal correcto.":
+    "Top right, check you're on the right channel.",
+  "Ajustes → Canal → Configuración avanzada.": "Settings → Channel → Advanced settings.",
+  "Copia el ID del canal.": "Copy the channel ID.",
+  "Confirma que estás en la cuenta del programa.":
+    "Check you're on the show's account.",
+  "Si es cuenta personal, cámbiala a Business.":
+    "If it's a personal account, switch it to Business.",
+  "Copia el usuario.": "Copy the handle.",
+  "Escoge la cuenta publicitaria (empieza con act_).":
+    "Pick the ad account (it starts with act_).",
+  "Copia el ID.": "Copy the ID.",
+  "Si no hay ninguna, créala aquí mismo.": "If there isn't one, create it right here.",
+  "Los anuncios de Instagram salen de la misma cuenta de Meta.":
+    "Instagram ads come out of the same Meta account.",
+  "Si Facebook ya está conectado, esto queda hecho.":
+    "If Facebook is already connected, this one is done.",
+  "Arriba a la derecha está el ID de cliente, 10 dígitos.":
+    "The customer ID is top right — 10 digits.",
+  "Herramientas → Cuentas vinculadas → enlaza el canal de YouTube.":
+    "Tools → Linked accounts → link the YouTube channel.",
+  "Facturación → confirma que hay método de pago.":
+    "Billing → check there's a payment method.",
+  "Copia el ID de anunciante.": "Copy the advertiser ID.",
+  "Ajustes → Identidad → autoriza la cuenta del programa.":
+    "Settings → Identity → authorise the show's account.",
+  "Si nunca has anunciado, X te pide crear la cuenta de anunciante aquí.":
+    "If you've never advertised, X asks you to create the advertiser account here.",
+  "Agrega método de pago.": "Add a payment method.",
+  "Cuenta de TikTok": "TikTok account",
+  "Cuenta de X": "X account",
 
   // Settings
   "Presupuesto normal por semana": "Usual weekly budget",

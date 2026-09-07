@@ -196,6 +196,8 @@ const EN: Record<string, string> = {
   "Todavía no se ha conectado esta cuenta.":
     "This account hasn't been connected yet.",
   "Conectar": "Connect",
+  "Te lleva a la plataforma, apruebas, y vuelves conectado.":
+    "It takes you to the platform, you approve, and you come back connected.",
   "Ya está listo": "It's done",
   "Se abre en tu navegador, donde ya estás con la sesión iniciada. Sigue los pasos y vuelve aquí.":
     "It opens in your browser, where you're already signed in. Follow the steps and come back here.",

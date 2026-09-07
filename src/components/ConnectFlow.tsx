@@ -24,6 +24,22 @@ import { useLang } from "@/lib/i18n";
 import type { Platform, PlacementKind } from "@/lib/types";
 import { PLATFORMS } from "@/lib/types";
 
+/**
+ * Set NEXT_PUBLIC_OAUTH_URL once the Edge Function is deployed (see
+ * backend/SETUP.md) and the organic platforms switch from a guided checklist
+ * to a real one-click connect. Until then the steps below are the fallback,
+ * and they are the thing the OAuth replaces.
+ */
+const OAUTH_URL = process.env.NEXT_PUBLIC_OAUTH_URL ?? "";
+
+/** Which OAuth provider owns each platform. Meta covers two. */
+const PROVIDER: Partial<Record<Platform, string>> = {
+  facebook: "meta",
+  instagram: "meta",
+  youtube: "google",
+  tiktok: "tiktok",
+};
+
 interface Guide {
   /** Opens as deep as the platform allows without an API. */
   url: string;
@@ -145,6 +161,12 @@ export default function ConnectFlow({
   const pf = PLATFORMS[platform];
   if (!guide) return null;
 
+  // Real OAuth only exists for posting. Buying ads needs a separate approval
+  // on every platform, so a paid row keeps the manual route even once the
+  // function is live — see backend/SETUP.md.
+  const provider = kind === "organic" ? PROVIDER[platform] : undefined;
+  const oneClick = Boolean(OAUTH_URL && provider);
+
   async function confirm() {
     setBusy(true);
     const sb = browserClient();
@@ -177,6 +199,24 @@ export default function ConnectFlow({
   }
 
   if (connected) return null;
+
+  // The whole flow collapses to a single link when the backend is there.
+  if (oneClick) {
+    return (
+      <div className="mt-3">
+        <a
+          href={`${OAUTH_URL}/start?platform=${provider}`}
+          className="inline-block text-xs px-3 py-1.5 rounded-full font-semibold"
+          style={{ background: "var(--brass)", color: "#17130a" }}
+        >
+          {t("Conectar")} {pf.label}
+        </a>
+        <p className="text-xs mt-2" style={{ color: "var(--faint)" }}>
+          {t("Te lleva a la plataforma, apruebas, y vuelves conectado.")}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-3">

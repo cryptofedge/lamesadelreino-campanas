@@ -23,7 +23,12 @@ const nextConfig: NextConfig = {
 
   // Next prefixes its own assets and every next/link href, but a plain
   // <img src="/logo.png"> is untouched and would resolve to the domain root.
-  env: { NEXT_PUBLIC_BASE_PATH: BASE_PATH },
+  env: {
+    NEXT_PUBLIC_BASE_PATH: BASE_PATH,
+    // Empty until the OAuth Edge Function is deployed; the connections page
+    // falls back to guided steps while it is.
+    NEXT_PUBLIC_OAUTH_URL: process.env.NEXT_PUBLIC_OAUTH_URL ?? "",
+  },
 
   // Emit /campanas/index.html rather than /campanas.html, so the URL survives
   // being typed or refreshed.

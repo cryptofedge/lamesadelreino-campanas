@@ -167,11 +167,22 @@ begin
          exists (select 1 from profiles p where p.id = auth.uid() and p.active)
        )', t || '_write', t);
 
-    -- The anon role gets nothing. A signed-out visitor with the public key
-    -- must not be able to read the show's plans.
+    -- RLS decides which ROWS a role may see; a table GRANT decides whether it
+    -- may touch the table at all. Supabase's "expose new tables" default hands
+    -- both roles everything, so this sets them deliberately instead: anon gets
+    -- nothing, authenticated gets the four verbs and is then gated by policy.
     execute format('revoke all on %I from anon', t);
+    execute format('grant select, insert, update, delete on %I to authenticated', t);
   end loop;
 end $$;
+
+grant usage on schema public to authenticated;
+
+-- profiles is not in that loop (it has its own policy above) and was missed
+-- the first time this ran, leaving anon with a full grant on it. RLS was still
+-- refusing the rows, but the grant had no business being there.
+revoke all on profiles from anon;
+grant select on profiles to authenticated;
 
 -- ---------------------------------------------------------------------
 -- OAuth tokens.
@@ -197,6 +208,9 @@ create table if not exists oauth_tokens (
 );
 
 alter table oauth_tokens enable row level security;
+revoke all on oauth_tokens from anon, authenticated;
+-- Belt and braces: the auto-expose default fires on table creation, so revoke
+-- again after it rather than trusting the order.
 revoke all on oauth_tokens from anon, authenticated;
 
 -- ---------------------------------------------------------------------

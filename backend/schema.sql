@@ -28,13 +28,34 @@ create table if not exists profiles (
 
 alter table profiles enable row level security;
 
+-- ---------------------------------------------------------------------
+-- Membership checks.
+--
+-- These MUST be security definer. A policy on profiles that itself queries
+-- profiles recurses forever — Postgres raises 42P17 and every read in the
+-- console fails, including the ones on other tables, because their policies
+-- query profiles too. security definer runs as the function owner and skips
+-- RLS, which is what breaks the loop.
+--
+-- They are `stable` so the planner calls them once per statement rather than
+-- once per row.
+-- ---------------------------------------------------------------------
+create or replace function is_active_member() returns boolean
+language sql security definer stable set search_path = public as $fn$
+  select exists (select 1 from profiles where id = auth.uid() and active);
+$fn$;
+
+create or replace function is_owner() returns boolean
+language sql security definer stable set search_path = public as $fn$
+  select exists (select 1 from profiles where id = auth.uid() and role = 'owner');
+$fn$;
+
+grant execute on function is_active_member(), is_owner() to authenticated;
+
 -- Read your own row. Owners can see the team.
 drop policy if exists profiles_read on profiles;
 create policy profiles_read on profiles for select to authenticated
-  using (
-    id = auth.uid()
-    or exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'owner')
-  );
+  using (id = auth.uid() or is_owner());
 
 -- Nobody updates profiles directly: granting update on the row would also
 -- hand over `role` and `active`, because RLS gates rows and not columns.
@@ -155,17 +176,13 @@ begin
 
     execute format('drop policy if exists %I on %I', t || '_read', t);
     execute format(
-      'create policy %I on %I for select to authenticated using (
-         exists (select 1 from profiles p where p.id = auth.uid() and p.active)
-       )', t || '_read', t);
+      'create policy %I on %I for select to authenticated using (is_active_member())',
+      t || '_read', t);
 
     execute format('drop policy if exists %I on %I', t || '_write', t);
     execute format(
-      'create policy %I on %I for all to authenticated using (
-         exists (select 1 from profiles p where p.id = auth.uid() and p.active)
-       ) with check (
-         exists (select 1 from profiles p where p.id = auth.uid() and p.active)
-       )', t || '_write', t);
+      'create policy %I on %I for all to authenticated using (is_active_member())
+       with check (is_active_member())', t || '_write', t);
 
     -- RLS decides which ROWS a role may see; a table GRANT decides whether it
     -- may touch the table at all. Supabase's "expose new tables" default hands

@@ -29,6 +29,12 @@ function Guard({ children }: { children: React.ReactNode }) {
       router.replace(`/login?next=${encodeURIComponent(path)}`);
       return;
     }
+    // A temporary password is still a password somebody else typed and sent
+    // over WhatsApp. Nothing else in the console opens until it is replaced.
+    if (profile.must_change_password) {
+      router.replace("/cambiar-clave");
+      return;
+    }
     if (profile.role !== "owner" && OWNER_ONLY.some((p) => path.startsWith(p))) {
       router.replace("/campanas?denied=1");
     }
@@ -44,8 +50,11 @@ function Guard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // The redirect is queued but has not run yet — do not paint an owner page for
-  // the team account, however briefly.
+  // Redirects are queued but have not run yet — do not paint the console for
+  // somebody on their way to the password screen, however briefly.
+  if (profile.must_change_password) return null;
+
+  // Same for the owner-only routes and the team account.
   if (profile.role !== "owner" && OWNER_ONLY.some((p) => path.startsWith(p))) {
     return null;
   }

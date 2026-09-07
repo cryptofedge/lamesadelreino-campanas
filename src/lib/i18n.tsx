@@ -196,6 +196,25 @@ const EN: Record<string, string> = {
   "Todavía no se ha conectado esta cuenta.":
     "This account hasn't been connected yet.",
   "Conectar": "Connect",
+  "Configura tu cuenta": "Set up your account",
+  "Entraste con una contraseña temporal. Escoge tu nombre y una contraseña tuya para seguir — nadie más la va a saber.":
+    "You signed in with a temporary password. Pick your name and a password of your own to continue — nobody else will know it.",
+  "Tu nombre": "Your name",
+  "Nueva contraseña": "New password",
+  "Repítela": "Repeat it",
+  "Mínimo 8 caracteres. Usa algo que no uses en otro sitio.":
+    "At least 8 characters. Use something you don't use anywhere else.",
+  "Guardar y entrar": "Save and continue",
+  "Escribe tu nombre.": "Enter your name.",
+  "La contraseña debe tener al menos 8 caracteres.":
+    "The password must be at least 8 characters.",
+  "Las dos contraseñas no son iguales.": "The two passwords don't match.",
+  "Escoge una contraseña distinta a la temporal.":
+    "Choose a password different from the temporary one.",
+  "No se pudo cambiar la contraseña. Intenta de nuevo.":
+    "The password couldn't be changed. Try again.",
+  "La contraseña se cambió, pero no pudimos guardar el estado. Vuelve a entrar.":
+    "The password changed, but we couldn't save the state. Sign in again.",
   "Te lleva a la plataforma, apruebas, y vuelves conectado.":
     "It takes you to the platform, you approve, and you come back connected.",
   "Ya está listo": "It's done",
